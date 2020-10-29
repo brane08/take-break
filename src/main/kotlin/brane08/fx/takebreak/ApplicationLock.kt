@@ -1,7 +1,6 @@
-package com.helios.takebreak
+package brane08.fx.takebreak
 
 import java.io.IOException
-import java.lang.RuntimeException
 import java.net.InetAddress
 import java.net.ServerSocket
 
