@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation "eu.hansolo:tilesfx:11.32"
     implementation "ch.qos.logback:logback-classic:1.2.3"
 }
