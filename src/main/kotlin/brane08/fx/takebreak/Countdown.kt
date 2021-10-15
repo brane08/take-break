@@ -1,4 +1,4 @@
-package com.helios.takebreak
+package brane08.fx.takebreak
 
 import eu.hansolo.tilesfx.Tile
 import eu.hansolo.tilesfx.Tile.SkinType

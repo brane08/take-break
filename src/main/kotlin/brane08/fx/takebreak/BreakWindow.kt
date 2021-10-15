@@ -1,4 +1,4 @@
-package com.helios.takebreak
+package brane08.fx.takebreak
 
 import javafx.application.Application
 import javafx.application.Platform
@@ -7,10 +7,9 @@ import javafx.scene.Scene
 import javafx.stage.Screen
 import javafx.stage.Stage
 import javafx.stage.StageStyle
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import java.awt.*
-import java.lang.Exception
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.Executors
@@ -19,6 +18,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.ImageIcon
 import kotlin.system.exitProcess
+
 
 class BreakWindow : Application() {
 
@@ -52,6 +52,7 @@ class BreakWindow : Application() {
     }
 
     override fun start(stage: Stage?) {
+        LOG.info("starting app")
         Platform.setImplicitExit(false)
         systemTray()
         stage?.let {
@@ -64,7 +65,7 @@ class BreakWindow : Application() {
             it.x = X;
             it.y = Y;
         }
-        val future = monitorPool.submit(Runnable {
+        monitorPool.submit(Runnable {
             try {
                 while (true) {
                     if (scheduler.isShutdown)
@@ -121,8 +122,7 @@ class BreakWindow : Application() {
     }
 
     companion object {
-
-        val LOG: Logger = LoggerFactory.getLogger("take-break")
+        val LOG: Logger = LogManager.getLogger("take-break")
         private const val SCALE_FACTOR = 70
         var WIDTH: Double = 0.0
         var HEIGHT: Double = 0.0

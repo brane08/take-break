@@ -3,6 +3,7 @@
 !src/**/build/
 out/
 logs/
+target/
 
 # Ignore Gradle GUI config
 gradle-app.setting
