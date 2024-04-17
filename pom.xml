@@ -2,34 +2,29 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>brane08.fx</groupId>
+	<groupId>com.github.brane08.fx</groupId>
 	<artifactId>take-break</artifactId>
-	<version>0.1</version>
+	<version>1.0</version>
 	<packaging>jar</packaging>
 	<name>take-break</name>
 	<description>take-break</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>17</java.version>
-		<main.class>brane08.fx.takebreak.BreakApplication</main.class>
+		<java.version>21</java.version>
+		<main.class>com.github.brane08.fx.takebreak.BreakApplication</main.class>
 		<kotlin.code.style>official</kotlin.code.style>
-		<kotlin.version>1.7.20</kotlin.version>
-		<javafx.version>17.0.2</javafx.version>
-		<tilesfx.version>17.0.11</tilesfx.version>
-		<log4j.version>2.19.0</log4j.version>
+		<kotlin.version>1.9.23</kotlin.version>
+		<javafx.version>22</javafx.version>
+		<tilesfx.version>21.0.3</tilesfx.version>
+		<!-- Plugin versions -->
+		<compile.plugin.version>3.13.0</compile.plugin.version>
+		<dependency.plugin.version>3.6.1</dependency.plugin.version>
+		<versions.plugin.version>2.16.2</versions.plugin.version>
+		<assembly.plugin.version>3.7.1</assembly.plugin.version>
+		<enforcer.plugin.version>3.4.1</enforcer.plugin.version>
 	</properties>
 	<dependencies>
-		<dependency>
-			<groupId>org.jetbrains.kotlin</groupId>
-			<artifactId>kotlin-stdlib</artifactId>
-			<version>${kotlin.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jetbrains.kotlin</groupId>
-			<artifactId>kotlin-reflect</artifactId>
-			<version>${kotlin.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-controls</artifactId>
@@ -53,76 +48,39 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.33</version>
+			<version>2.0.13</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
-			<version>2.19.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-			<version>${log4j.version}</version>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.5.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.13.4.1</version>
+			<version>2.17.0</version>
 		</dependency>
 		<dependency>
-			<groupId>org.jetbrains.kotlin</groupId>
-			<artifactId>kotlin-test-junit5</artifactId>
-			<version>1.7.20</version>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.10.2</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<build>
-		<sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
-		<testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.10.1</version>
+				<version>${compile.plugin.version}</version>
 				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
 					<release>${java.version}</release>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>kotlin-maven-plugin</artifactId>
-				<groupId>org.jetbrains.kotlin</groupId>
-				<version>${kotlin.version}</version>
-				<executions>
-					<execution>
-						<id>compile</id>
-						<phase>process-sources</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>test-compile</id>
-						<goals>
-							<goal>test-compile</goal>
-						</goals>
-						<configuration/>
-					</execution>
-				</executions>
-				<configuration>
-					<jvmTarget>${java.version}</jvmTarget>
-					<nowarn>true</nowarn>
-					<args>
-						<arg>-Xjsr305=strict</arg>
-					</args>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>${assembly.plugin.version}</version>
 				<executions>
 					<execution>
 						<id>jar-with-dependencies</id>
@@ -161,7 +119,53 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>3.1.2</version>
+				<version>${dependency.plugin.version}</version>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
+				<version>${versions.plugin.version}</version>
+				<configuration>
+					<ruleSet>
+						<ignoreVersions>
+							<ignoreVersion>
+								<type>regex</type>
+								<version>.*[\.|-]+[alpha|Alpha|Alpha-|beta|Beta|Beta-]+[\.|-]*\d*</version>
+							</ignoreVersion>
+							<ignoreVersion>
+								<type>regex</type>
+								<version>.*[\.|-]+[M|m|RC|rc|b|B]+[\.|-]*\d*</version>
+							</ignoreVersion>
+						</ignoreVersions>
+						<comparisonMethod>maven</comparisonMethod>
+					</ruleSet>
+					<comparisonMethod>maven</comparisonMethod>
+					<processDependencyManagement>false</processDependencyManagement>
+					<processDependencyManagementTransitive>false</processDependencyManagementTransitive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>${enforcer.plugin.version}</version>
+				<executions>
+					<execution>
+						<id>enforce-versions</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireMavenVersion>
+									<version>[3.9.5,)</version>
+								</requireMavenVersion>
+								<requireJavaVersion>
+									<version>${java.version}</version>
+								</requireJavaVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.openjfx</groupId>

@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx"
 	  xmlns:fx="http://javafx.com/fxml"
-	  fx:controller="brane08.fx.takebreak.BreakController" fx:id="rootPane">
+	  fx:controller="com.github.brane08.fx.takebreak.BreakController" fx:id="rootPane">
 	<padding>
 		<Insets top="20" right="20" bottom="20" left="20"/>
 	</padding>
