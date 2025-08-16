@@ -15,7 +15,7 @@
 		<main.class>com.github.brane08.fx.takebreak.BreakApplication</main.class>
 		<kotlin.code.style>official</kotlin.code.style>
 		<kotlin.version>1.9.23</kotlin.version>
-		<javafx.version>22</javafx.version>
+		<javafx.version>22.0.2</javafx.version>
 		<tilesfx.version>21.0.3</tilesfx.version>
 		<!-- Plugin versions -->
 		<compile.plugin.version>3.13.0</compile.plugin.version>
