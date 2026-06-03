@@ -1,25 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
-<GridPane hgap="10" vgap="10" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
-	<Label text="Short Break:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-	<Slider blockIncrement="5.0" majorTickUnit="5.0" max="40.0" min="5.0" minorTickCount="5" showTickMarks="true"
+<GridPane hgap="20" vgap="15" xmlns="http://javafx.com/javafx"
+		  xmlns:fx="http://javafx.com/fxml"
+		  fx:controller="com.github.brane08.fx.takebreak.ConfigController">
+	<padding>
+		<Insets top="20" right="20" bottom="20" left="20"/>
+	</padding>
+	<Label text="Short Break (seconds):" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+	<Slider fx:id="smallBreakSlider" blockIncrement="10.0" majorTickUnit="20.0" max="120.0" min="10.0"
+			minorTickCount="1" showTickMarks="true" showTickLabels="true" snapToTicks="true"
 			GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-	<Label text="Long Break:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-	<Slider blockIncrement="30.0" majorTickUnit="30.0" max="300.0" min="30.0" minorTickCount="30" showTickMarks="true"
+	<Label text="Long Break (seconds):" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+	<Slider fx:id="longBreakSlider" blockIncrement="60.0" majorTickUnit="60.0" max="600.0" min="60.0"
+			showTickMarks="true" showTickLabels="true" snapToTicks="true"
 			GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-	<Label text="Spacing:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-	<Slider blockIncrement="1.0" majorTickUnit="5.0" max="30.0" min="1" minorTickCount="1" showTickMarks="true"
+	<Label text="Spacing (seconds):" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+	<Slider fx:id="spacingSlider" blockIncrement="60.0" majorTickUnit="600.0" max="3600.0" min="60.0"
+			minorTickCount="4" showTickMarks="true" showTickLabels="true" snapToTicks="true"
 			GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+	<HBox alignment="CENTER_RIGHT" spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="2">
+		<padding>
+			<Insets top="10"/>
+		</padding>
+		<Button text="Reset" onAction="#resetDefaults"/>
+		<Button text="Save" onAction="#saveConfig"/>
+	</HBox>
 	<columnConstraints>
 		<ColumnConstraints/>
-		<ColumnConstraints/>
+		<ColumnConstraints hgrow="ALWAYS" minWidth="250"/>
 	</columnConstraints>
 	<rowConstraints>
+		<RowConstraints/>
 		<RowConstraints/>
 		<RowConstraints/>
 		<RowConstraints/>

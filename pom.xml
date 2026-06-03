@@ -13,16 +13,17 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>21</java.version>
 		<main.class>com.github.brane08.fx.takebreak.BreakApplication</main.class>
-		<kotlin.code.style>official</kotlin.code.style>
-		<kotlin.version>1.9.23</kotlin.version>
-		<javafx.version>22</javafx.version>
-		<tilesfx.version>21.0.3</tilesfx.version>
+		<javafx.version>21.0.9</javafx.version>
+		<tilesfx.version>21.0.9</tilesfx.version>
+		<slf4j.version>2.0.17</slf4j.version>
+		<logback.version>1.5.32</logback.version>
+		<jackson.version>2.20.1</jackson.version>
 		<!-- Plugin versions -->
-		<compile.plugin.version>3.13.0</compile.plugin.version>
-		<dependency.plugin.version>3.6.1</dependency.plugin.version>
-		<versions.plugin.version>2.16.2</versions.plugin.version>
-		<assembly.plugin.version>3.7.1</assembly.plugin.version>
-		<enforcer.plugin.version>3.4.1</enforcer.plugin.version>
+		<compile.plugin.version>3.15.0</compile.plugin.version>
+		<dependency.plugin.version>3.10.0</dependency.plugin.version>
+		<versions.plugin.version>2.21.0</versions.plugin.version>
+		<assembly.plugin.version>3.8.0</assembly.plugin.version>
+		<enforcer.plugin.version>3.6.2</enforcer.plugin.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -36,9 +37,24 @@
 			<version>${javafx.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-web</artifactId>
-			<version>${javafx.version}</version>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>${logback.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.dustinredmond.fxtrayicon</groupId>
+			<artifactId>FXTrayIcon</artifactId>
+			<version>4.2.3</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.hansolo</groupId>
@@ -46,24 +62,9 @@
 			<version>${tilesfx.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>2.0.13</version>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>1.5.5</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.17.0</version>
-		</dependency>
-		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.10.2</version>
+			<version>5.11.4</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -134,12 +135,10 @@
 							</ignoreVersion>
 							<ignoreVersion>
 								<type>regex</type>
-								<version>.*[\.|-]+[M|m|RC|rc|b|B]+[\.|-]*\d*</version>
+								<version>.*[\.|-]+[M|m|RC|rc|b|B|ea\+]+[\.|-]*\d*</version>
 							</ignoreVersion>
 						</ignoreVersions>
-						<comparisonMethod>maven</comparisonMethod>
 					</ruleSet>
-					<comparisonMethod>maven</comparisonMethod>
 					<processDependencyManagement>false</processDependencyManagement>
 					<processDependencyManagementTransitive>false</processDependencyManagementTransitive>
 				</configuration>

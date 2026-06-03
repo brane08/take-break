@@ -1,15 +1,12 @@
-package com.github.brane08.fx.takebreak;
+package com.github.brane08.fx.takebreak.controllers;
 
-import eu.hansolo.tilesfx.Tile;
+import com.github.brane08.fx.takebreak.Constants;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.scene.control.Button;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
+import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import org.slf4j.Logger;
@@ -31,17 +28,16 @@ public class BreakController implements Initializable {
     @FXML
     VBox rootPane;
     @FXML
-    Tile minutes;
+    Label minutes;
     @FXML
-    Tile seconds;
+    Label seconds;
     @FXML
     Button btnSkip;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        rootPane.setBackground(new Background(new BackgroundFill(Tile.BACKGROUND.brighter(), CornerRadii.EMPTY, Insets.EMPTY)));
-        minutes.descriptionProperty().bindBidirectional(minuteProperty);
-        seconds.descriptionProperty().bindBidirectional(secondProperty);
+        minutes.textProperty().bindBidirectional(minuteProperty);
+        seconds.textProperty().bindBidirectional(secondProperty);
     }
 
     public void stopTimer() {

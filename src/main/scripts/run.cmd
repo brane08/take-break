@@ -6,4 +6,4 @@ if defined JAVA_HOME (
     set JAVA_PATH="javaw"
 )
 
-%JAVA_PATH% -jar take-break-app.jar
+%JAVA_PATH% -Dprism.allowhidpi=true -jar take-break-app.jar
