@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.github.brane08.fx.takebreak.controllers.WarningController"
+           style="-fx-background-color: rgba(30,30,30,0.85); -fx-background-radius: 12; -fx-padding: 12 20 12 20;"
+           prefWidth="300" prefHeight="70">
+    <Label fx:id="message" text="Break coming up"
+           style="-fx-text-fill: white; -fx-font-size: 14;"/>
+</StackPane>

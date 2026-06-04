@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Take Break
+Comment=Reminder to take regular breaks
+Exec=/opt/take-break/run.sh
+Icon=/opt/take-break/icon.png
+Terminal=false
+Categories=Utility;
+StartupNotify=false

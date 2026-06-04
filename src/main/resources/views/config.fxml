@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <GridPane hgap="20" vgap="15" xmlns="http://javafx.com/javafx"
 		  xmlns:fx="http://javafx.com/fxml"
-		  fx:controller="com.github.brane08.fx.takebreak.ConfigController">
+		  fx:controller="com.github.brane08.fx.takebreak.controllers.ConfigController">
 	<padding>
 		<Insets top="20" right="20" bottom="20" left="20"/>
 	</padding>
@@ -26,7 +26,15 @@
 	<Slider fx:id="spacingSlider" blockIncrement="60.0" majorTickUnit="600.0" max="3600.0" min="60.0"
 			minorTickCount="4" showTickMarks="true" showTickLabels="true" snapToTicks="true"
 			GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-	<HBox alignment="CENTER_RIGHT" spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="2">
+	<Label text="Warning (seconds):" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+	<Slider fx:id="warningSlider" blockIncrement="10.0" majorTickUnit="30.0" max="120.0" min="0.0"
+			showTickMarks="true" showTickLabels="true" snapToTicks="true"
+			GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+	<Label text="Idle Timeout (seconds):" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+	<Slider fx:id="idleSlider" blockIncrement="60" majorTickUnit="60" max="600" min="60"
+			showTickMarks="true" showTickLabels="true" snapToTicks="true"
+			GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+	<HBox alignment="CENTER_RIGHT" spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.columnSpan="2">
 		<padding>
 			<Insets top="10"/>
 		</padding>
@@ -38,6 +46,8 @@
 		<ColumnConstraints hgrow="ALWAYS" minWidth="250"/>
 	</columnConstraints>
 	<rowConstraints>
+		<RowConstraints/>
+		<RowConstraints/>
 		<RowConstraints/>
 		<RowConstraints/>
 		<RowConstraints/>

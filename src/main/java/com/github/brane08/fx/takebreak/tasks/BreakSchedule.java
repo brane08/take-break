@@ -2,6 +2,7 @@ package com.github.brane08.fx.takebreak.tasks;
 
 import com.github.brane08.fx.takebreak.Constants;
 import com.github.brane08.fx.takebreak.domain.BreakConfig;
+import com.github.brane08.fx.takebreak.idle.IdleDetector;
 import com.github.brane08.fx.takebreak.inject.Injector;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -22,13 +23,15 @@ public final class BreakSchedule implements Runnable {
     private final Stage currentStage;
     private final MenuItem skipItem;
     private final Function<Integer, Integer> startTimer;
+    private final IdleDetector idleDetector;
 
     public BreakSchedule(AtomicInteger counter, Stage currentStage, MenuItem skipItem,
-                         Function<Integer, Integer> startTimer) {
+                         Function<Integer, Integer> startTimer, IdleDetector idleDetector) {
         this.counter = counter;
         this.currentStage = currentStage;
         this.skipItem = skipItem;
         this.startTimer = startTimer;
+        this.idleDetector = idleDetector;
     }
 
     @Override
@@ -36,6 +39,12 @@ public final class BreakSchedule implements Runnable {
         try {
             LOG.info("{}", DateTimeFormatter.ISO_INSTANT.format(Instant.now()));
             BreakConfig breakConfig = Injector.resolveNamed("breakConfig");
+            long idleSecs = idleDetector.getIdleSeconds();
+            if (idleSecs >= breakConfig.idleThreshold()) {
+                LOG.info("Skipping break — idle {}s >= threshold {}s",
+                        idleSecs, breakConfig.idleThreshold());
+                return;
+            }
             int displayTime = breakConfig.getBreakTime(counter.addAndGet(1));
             Platform.runLater(() -> {
                 skipItem.setEnabled(true);
@@ -45,6 +54,5 @@ public final class BreakSchedule implements Runnable {
         } catch (Exception e) {
             LOG.error("Unhandled exception, check!!!", e);
         }
-
     }
 }

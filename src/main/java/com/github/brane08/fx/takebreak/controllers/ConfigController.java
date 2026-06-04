@@ -1,4 +1,4 @@
-package com.github.brane08.fx.takebreak;
+package com.github.brane08.fx.takebreak.controllers;
 
 import com.github.brane08.fx.takebreak.domain.BreakConfig;
 import com.github.brane08.fx.takebreak.inject.Injector;
@@ -12,12 +12,11 @@ import java.util.function.Consumer;
 
 public class ConfigController implements Initializable {
 
-    @FXML
-    private Slider smallBreakSlider;
-    @FXML
-    private Slider longBreakSlider;
-    @FXML
-    private Slider spacingSlider;
+    @FXML Slider smallBreakSlider;
+    @FXML Slider longBreakSlider;
+    @FXML Slider spacingSlider;
+    @FXML Slider warningSlider;
+    @FXML Slider idleSlider;
 
     private Consumer<BreakConfig> rescheduleCallback;
 
@@ -31,6 +30,8 @@ public class ConfigController implements Initializable {
         smallBreakSlider.setValue(config.smallBreak());
         longBreakSlider.setValue(config.longBreak());
         spacingSlider.setValue(config.spacing());
+        warningSlider.setValue(config.warningTime());
+        idleSlider.setValue(config.idleThreshold());
     }
 
     @FXML
@@ -38,6 +39,8 @@ public class ConfigController implements Initializable {
         smallBreakSlider.setValue(BreakConfig.DEFAULT_SMALL);
         longBreakSlider.setValue(BreakConfig.DEFAULT_LONG);
         spacingSlider.setValue(BreakConfig.DEFAULT_SPACING);
+        warningSlider.setValue(BreakConfig.DEFAULT_WARNING);
+        idleSlider.setValue(BreakConfig.DEFAULT_IDLE);
     }
 
     @FXML
@@ -45,12 +48,21 @@ public class ConfigController implements Initializable {
         int small = (int) smallBreakSlider.getValue();
         int large = (int) longBreakSlider.getValue();
         int spacing = (int) spacingSlider.getValue();
-        BreakConfig updated = new BreakConfig(small, large, spacing, "1.0");
+        int warning = (int) warningSlider.getValue();
+        int idle = (int) idleSlider.getValue();
+        if (warning >= spacing) {
+            warning = Math.max(0, spacing - 10);
+            warningSlider.setValue(warning);
+        }
+        BreakConfig updated = new BreakConfig(small, large, spacing, warning, idle);
         updated.save();
         Injector.registerNamed("breakConfig", updated);
         if (rescheduleCallback != null) {
             rescheduleCallback.accept(updated);
         }
-        smallBreakSlider.getScene().getWindow().hide();
+        if (smallBreakSlider.getScene() != null
+                && smallBreakSlider.getScene().getWindow() != null) {
+            smallBreakSlider.getScene().getWindow().hide();
+        }
     }
 }

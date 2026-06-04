@@ -2,9 +2,14 @@ package com.github.brane08.fx.takebreak;
 
 import com.dustinredmond.fxtrayicon.FXTrayIcon;
 import com.github.brane08.fx.takebreak.controllers.BreakController;
+import com.github.brane08.fx.takebreak.controllers.ConfigController;
+import com.github.brane08.fx.takebreak.controllers.WarningController;
 import com.github.brane08.fx.takebreak.domain.BreakConfig;
 import com.github.brane08.fx.takebreak.inject.Injector;
+import com.github.brane08.fx.takebreak.idle.IdleDetector;
+import com.github.brane08.fx.takebreak.idle.IdleDetectorFactory;
 import com.github.brane08.fx.takebreak.tasks.BreakSchedule;
+import com.github.brane08.fx.takebreak.tasks.WarningSchedule;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -12,6 +17,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -40,13 +46,16 @@ public class BreakApplication extends Application {
         Y = (screenBounds.getHeight() - HEIGHT) / 2;
     }
 
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
     private final ExecutorService monitorPool = Executors.newSingleThreadExecutor();
     private final MenuItem skipItem = new MenuItem("Skip Break");
     private final AtomicInteger counter = new AtomicInteger(0);
+    private final IdleDetector idleDetector = IdleDetectorFactory.create();
     private Stage defaultStage;
     private BreakController breakController;
     private volatile Future<?> schedulerFuture;
+    private volatile Future<?> warningFuture;
+    private volatile Stage activeToast;
     private final Runnable cleanup = () -> {
         scheduler.shutdownNow();
         monitorPool.shutdownNow();
@@ -71,8 +80,9 @@ public class BreakApplication extends Application {
         final BreakConfig breakConfig = Injector.resolveNamed("breakConfig");
         LOG.info("Using configs: {}", breakConfig.toString());
         schedulerFuture = scheduler.scheduleAtFixedRate(
-                new BreakSchedule(counter, rootStage, skipItem, controller::startTimer),
+                new BreakSchedule(counter, rootStage, skipItem, controller::startTimer, idleDetector),
                 breakConfig.spacing(), breakConfig.spacing(), TimeUnit.SECONDS);
+        scheduleWarning(breakConfig);
         monitorPool.submit(() -> {
             try {
                 schedulerFuture.get();
@@ -103,13 +113,48 @@ public class BreakApplication extends Application {
     }
 
     private void reschedule(BreakConfig config) {
-        if (schedulerFuture != null) {
-            schedulerFuture.cancel(false);
-        }
+        if (schedulerFuture != null) schedulerFuture.cancel(false);
+        if (warningFuture != null) warningFuture.cancel(false);
+        warningFuture = null;
         schedulerFuture = scheduler.scheduleAtFixedRate(
-                new BreakSchedule(counter, defaultStage, skipItem, breakController::startTimer),
+                new BreakSchedule(counter, defaultStage, skipItem, breakController::startTimer, idleDetector),
                 config.spacing(), config.spacing(), TimeUnit.SECONDS);
-        LOG.info("Rescheduled with spacing={}s", config.spacing());
+        scheduleWarning(config);
+        LOG.info("Rescheduled with spacing={}s warningTime={}s", config.spacing(), config.warningTime());
+    }
+
+    private void scheduleWarning(BreakConfig config) {
+        if (config.warningTime() <= 0) return;
+        long delay = Math.max(0, config.spacing() - config.warningTime());
+        warningFuture = scheduler.scheduleAtFixedRate(
+                new WarningSchedule(this::showWarningToast),
+                delay, config.spacing(), TimeUnit.SECONDS);
+    }
+
+    private void showWarningToast() {
+        if (activeToast != null && activeToast.isShowing()) {
+            activeToast.close();
+        }
+        try {
+            var loader = new FXMLLoader(getClass().getResource("/views/warning.fxml"));
+            Parent root = loader.load();
+            WarningController controller = loader.getController();
+            Stage toastStage = new Stage();
+            toastStage.initStyle(StageStyle.TRANSPARENT);
+            Scene scene = new Scene(root);
+            scene.setFill(Color.TRANSPARENT);
+            toastStage.setScene(scene);
+            toastStage.setAlwaysOnTop(true);
+            toastStage.setResizable(false);
+            Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+            toastStage.setX(bounds.getMinX() + bounds.getWidth() - 320);
+            toastStage.setY(bounds.getMinY() + bounds.getHeight() - 90);
+            controller.setStage(toastStage);
+            toastStage.show();
+            activeToast = toastStage;
+        } catch (IOException e) {
+            LOG.error("Failed to show warning toast", e);
+        }
     }
 
     private void settingStage(Parent parent) {
@@ -147,7 +192,6 @@ public class BreakApplication extends Application {
     }
 
     public static void main(String[] args) {
-        // Allow auto-detection of HiDPI scale when not set explicitly via -Dglass.gtk.uiScale
         if (System.getProperty("glass.gtk.uiScale") == null) {
             System.setProperty("glass.gtk.uiScale", "auto");
         }

@@ -3,11 +3,12 @@ module brane.fx.takebreak {
 	requires javafx.controls;
 	requires javafx.fxml;
     requires javafx.graphics;
-	requires eu.hansolo.tilesfx;
-	requires org.slf4j;
-	requires com.fasterxml.jackson.databind;
+requires org.slf4j;
     requires com.dustinredmond.fxtrayicon;
     requires javafx.base;
+    requires com.sun.jna;
+    requires com.sun.jna.platform;
+    opens com.github.brane08.fx.takebreak.idle;
 
     opens com.github.brane08.fx.takebreak;
 	exports com.github.brane08.fx.takebreak;
