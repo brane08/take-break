@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class BreakApplication extends Application {
 
@@ -49,7 +50,9 @@ public class BreakApplication extends Application {
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
     private final ExecutorService monitorPool = Executors.newSingleThreadExecutor();
-    private final MenuItem skipItem = new MenuItem("Skip Break");
+    // Placeholder until systemTray() swaps in the real tray "Skip Break" AWT MenuItem
+    // (FXTrayIcon.Builder builds its own internal MenuItem, not this one).
+    private final AtomicReference<MenuItem> skipItemRef = new AtomicReference<>(new MenuItem("Skip Break"));
     private final AtomicInteger counter = new AtomicInteger(0);
     private final AtomicLong epoch = new AtomicLong(0);
     private final IdleDetector idleDetector = IdleDetectorFactory.create();
@@ -64,7 +67,7 @@ public class BreakApplication extends Application {
     };
 
     private final Runnable hideCallback = () -> {
-        skipItem.setEnabled(false);
+        skipItemRef.get().setEnabled(false);
         defaultStage.hide();
     };
 
@@ -82,7 +85,7 @@ public class BreakApplication extends Application {
         final BreakConfig breakConfig = Injector.resolveNamed(Constants.DI_BREAK_CONFIG);
         LOG.info("Using configs: {}", breakConfig.toString());
         schedulerFuture = scheduler.scheduleAtFixedRate(
-                new BreakSchedule(counter, rootStage, skipItem, controller::startTimer, idleDetector, epoch, epoch.get()),
+                new BreakSchedule(counter, rootStage, skipItemRef, controller::startTimer, idleDetector, epoch, epoch.get()),
                 breakConfig.spacing(), breakConfig.spacing(), TimeUnit.SECONDS);
         scheduleWarning(breakConfig);
         monitorPool.submit(() -> {
@@ -120,7 +123,7 @@ public class BreakApplication extends Application {
         warningFuture = null;
         long myEpoch = epoch.incrementAndGet();
         schedulerFuture = scheduler.scheduleAtFixedRate(
-                new BreakSchedule(counter, defaultStage, skipItem, breakController::startTimer, idleDetector, epoch, myEpoch),
+                new BreakSchedule(counter, defaultStage, skipItemRef, breakController::startTimer, idleDetector, epoch, myEpoch),
                 config.spacing(), config.spacing(), TimeUnit.SECONDS);
         scheduleWarning(config);
         LOG.info("Rescheduled with spacing={}s warningTime={}s", config.spacing(), config.warningTime());
@@ -197,6 +200,13 @@ public class BreakApplication extends Application {
                     })
                     .show()
                     .build();
+            // getMenuItem(0) is "Skip Break" — the first .menuItem(...) in build order above.
+            // Per FXTrayIcon's contract, fetch/mutate the returned AWT MenuItem on the AWT event thread.
+            EventQueue.invokeLater(() -> {
+                MenuItem realSkipItem = trayIcon.getMenuItem(0);
+                realSkipItem.setEnabled(false);
+                skipItemRef.set(realSkipItem);
+            });
         } catch (Exception e) {
             LOG.error("Failed to initialize system tray icon — running without a tray icon", e);
         }

@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 public final class BreakSchedule implements Runnable {
@@ -22,18 +23,18 @@ public final class BreakSchedule implements Runnable {
 
     private final AtomicInteger counter;
     private final Stage currentStage;
-    private final MenuItem skipItem;
+    private final AtomicReference<MenuItem> skipItemRef;
     private final Function<Integer, Integer> startTimer;
     private final IdleDetector idleDetector;
     private final AtomicLong currentEpoch;
     private final long myEpoch;
 
-    public BreakSchedule(AtomicInteger counter, Stage currentStage, MenuItem skipItem,
+    public BreakSchedule(AtomicInteger counter, Stage currentStage, AtomicReference<MenuItem> skipItemRef,
                          Function<Integer, Integer> startTimer, IdleDetector idleDetector,
                          AtomicLong currentEpoch, long myEpoch) {
         this.counter = counter;
         this.currentStage = currentStage;
-        this.skipItem = skipItem;
+        this.skipItemRef = skipItemRef;
         this.startTimer = startTimer;
         this.idleDetector = idleDetector;
         this.currentEpoch = currentEpoch;
@@ -43,6 +44,9 @@ public final class BreakSchedule implements Runnable {
     @Override
     public void run() {
         try {
+            if (currentEpoch.get() != myEpoch) {
+                return; // superseded by a reschedule — don't consume a break slot
+            }
             LOG.info("{}", DateTimeFormatter.ISO_INSTANT.format(Instant.now()));
             BreakConfig breakConfig = Injector.resolveNamed(Constants.DI_BREAK_CONFIG);
             long idleSecs = idleDetector.getIdleSeconds();
@@ -56,7 +60,7 @@ public final class BreakSchedule implements Runnable {
                 if (currentEpoch.get() != myEpoch) {
                     return; // superseded by a reschedule — drop this stale break
                 }
-                skipItem.setEnabled(true);
+                skipItemRef.get().setEnabled(true);
                 currentStage.show();
                 startTimer.apply(displayTime);
             });
