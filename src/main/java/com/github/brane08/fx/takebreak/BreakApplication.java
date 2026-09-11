@@ -28,6 +28,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class BreakApplication extends Application {
 
@@ -50,6 +51,7 @@ public class BreakApplication extends Application {
     private final ExecutorService monitorPool = Executors.newSingleThreadExecutor();
     private final MenuItem skipItem = new MenuItem("Skip Break");
     private final AtomicInteger counter = new AtomicInteger(0);
+    private final AtomicLong epoch = new AtomicLong(0);
     private final IdleDetector idleDetector = IdleDetectorFactory.create();
     private Stage defaultStage;
     private BreakController breakController;
@@ -77,10 +79,10 @@ public class BreakApplication extends Application {
         controller.setHideCallback(hideCallback);
         initStage(rootStage, parent);
         systemTray(controller);
-        final BreakConfig breakConfig = Injector.resolveNamed("breakConfig");
+        final BreakConfig breakConfig = Injector.resolveNamed(Constants.DI_BREAK_CONFIG);
         LOG.info("Using configs: {}", breakConfig.toString());
         schedulerFuture = scheduler.scheduleAtFixedRate(
-                new BreakSchedule(counter, rootStage, skipItem, controller::startTimer, idleDetector),
+                new BreakSchedule(counter, rootStage, skipItem, controller::startTimer, idleDetector, epoch, epoch.get()),
                 breakConfig.spacing(), breakConfig.spacing(), TimeUnit.SECONDS);
         scheduleWarning(breakConfig);
         monitorPool.submit(() -> {
@@ -113,11 +115,12 @@ public class BreakApplication extends Application {
     }
 
     private void reschedule(BreakConfig config) {
-        if (schedulerFuture != null) schedulerFuture.cancel(false);
-        if (warningFuture != null) warningFuture.cancel(false);
+        if (schedulerFuture != null) schedulerFuture.cancel(true);
+        if (warningFuture != null) warningFuture.cancel(true);
         warningFuture = null;
+        long myEpoch = epoch.incrementAndGet();
         schedulerFuture = scheduler.scheduleAtFixedRate(
-                new BreakSchedule(counter, defaultStage, skipItem, breakController::startTimer, idleDetector),
+                new BreakSchedule(counter, defaultStage, skipItem, breakController::startTimer, idleDetector, epoch, myEpoch),
                 config.spacing(), config.spacing(), TimeUnit.SECONDS);
         scheduleWarning(config);
         LOG.info("Rescheduled with spacing={}s warningTime={}s", config.spacing(), config.warningTime());
@@ -167,28 +170,36 @@ public class BreakApplication extends Application {
         settingsStage.showAndWait();
     }
 
-    private void systemTray(BreakController controller) throws IOException {
-        var image = new Image(getClass().getResourceAsStream("/coffee.png"));
-        final var trayIcon = new FXTrayIcon.Builder(defaultStage, image)
-                .menuItem("Skip Break", e -> controller.stopTimer())
-                .menuItem("Settings", e -> {
-                    final var loader = new FXMLLoader(getClass().getResource("/views/config.fxml"));
-                    try {
-                        final Parent parent = loader.load();
-                        ConfigController cc = loader.getController();
-                        cc.setRescheduleCallback(this::reschedule);
-                        settingStage(parent);
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                })
-                .menuItem("Exit", e -> {
-                    cleanup.run();
-                    Platform.exit();
-                    System.exit(0);
-                })
-                .show()
-                .build();
+    private void systemTray(BreakController controller) {
+        if (!SystemTray.isSupported()) {
+            LOG.warn("System tray unavailable — running without a tray icon");
+            return;
+        }
+        try {
+            var image = new Image(getClass().getResourceAsStream("/coffee.png"));
+            final var trayIcon = new FXTrayIcon.Builder(defaultStage, image)
+                    .menuItem("Skip Break", e -> controller.stopTimer())
+                    .menuItem("Settings", e -> {
+                        final var loader = new FXMLLoader(getClass().getResource("/views/config.fxml"));
+                        try {
+                            final Parent parent = loader.load();
+                            ConfigController cc = loader.getController();
+                            cc.setRescheduleCallback(this::reschedule);
+                            settingStage(parent);
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    })
+                    .menuItem("Exit", e -> {
+                        cleanup.run();
+                        Platform.exit();
+                        System.exit(0);
+                    })
+                    .show()
+                    .build();
+        } catch (Exception e) {
+            LOG.error("Failed to initialize system tray icon — running without a tray icon", e);
+        }
     }
 
     public static void main(String[] args) {

@@ -13,6 +13,7 @@ import java.awt.*;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 public final class BreakSchedule implements Runnable {
@@ -24,21 +25,26 @@ public final class BreakSchedule implements Runnable {
     private final MenuItem skipItem;
     private final Function<Integer, Integer> startTimer;
     private final IdleDetector idleDetector;
+    private final AtomicLong currentEpoch;
+    private final long myEpoch;
 
     public BreakSchedule(AtomicInteger counter, Stage currentStage, MenuItem skipItem,
-                         Function<Integer, Integer> startTimer, IdleDetector idleDetector) {
+                         Function<Integer, Integer> startTimer, IdleDetector idleDetector,
+                         AtomicLong currentEpoch, long myEpoch) {
         this.counter = counter;
         this.currentStage = currentStage;
         this.skipItem = skipItem;
         this.startTimer = startTimer;
         this.idleDetector = idleDetector;
+        this.currentEpoch = currentEpoch;
+        this.myEpoch = myEpoch;
     }
 
     @Override
     public void run() {
         try {
             LOG.info("{}", DateTimeFormatter.ISO_INSTANT.format(Instant.now()));
-            BreakConfig breakConfig = Injector.resolveNamed("breakConfig");
+            BreakConfig breakConfig = Injector.resolveNamed(Constants.DI_BREAK_CONFIG);
             long idleSecs = idleDetector.getIdleSeconds();
             if (idleSecs >= breakConfig.idleThreshold()) {
                 LOG.info("Skipping break — idle {}s >= threshold {}s",
@@ -47,6 +53,9 @@ public final class BreakSchedule implements Runnable {
             }
             int displayTime = breakConfig.getBreakTime(counter.addAndGet(1));
             Platform.runLater(() -> {
+                if (currentEpoch.get() != myEpoch) {
+                    return; // superseded by a reschedule — drop this stale break
+                }
                 skipItem.setEnabled(true);
                 currentStage.show();
                 startTimer.apply(displayTime);
