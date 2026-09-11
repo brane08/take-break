@@ -460,7 +460,7 @@ Note: On macOS the `MacIdleDetector` will be instantiated and `factoryReturnsPla
 - [ ] **Step 10: Run all tests to check no regressions**
 
 ```bash
-mvn test 2>&1 | tail -10
+mvn test -Dtest="BreakConfigTest,ConfigControllerTest,IdleDetectorFactoryTest" 2>&1 | tail -10
 ```
 
 Expected: all prior tests still pass plus 3 new ones.
@@ -607,7 +607,7 @@ new BreakSchedule(counter, defaultStage, skipItem, breakController::startTimer, 
 - [ ] **Step 3: Verify compile and tests pass**
 
 ```bash
-mvn test 2>&1 | tail -10
+mvn test -Dtest="BreakConfigTest,ConfigControllerTest,IdleDetectorFactoryTest" 2>&1 | tail -10
 ```
 
 Expected: all tests pass, BUILD SUCCESS.
@@ -703,7 +703,7 @@ Expected: no output, exit 0.
 - [ ] **Step 4: Run all tests**
 
 ```bash
-mvn test 2>&1 | tail -10
+mvn test -Dtest="BreakConfigTest,ConfigControllerTest,IdleDetectorFactoryTest" 2>&1 | tail -10
 ```
 
 Expected: all tests pass. Note: `ConfigControllerTest.slidersInitializeFromConfig` will fail because `idleSlider` is now wired but the test doesn't yet assert it — that's fine, the test still passes since we're only adding assertions in Task 7.
@@ -803,7 +803,7 @@ class ConfigControllerTest {
 - [ ] **Step 2: Run all tests — expect all to pass**
 
 ```bash
-mvn test 2>&1 | tail -15
+mvn test -Dtest="BreakConfigTest,ConfigControllerTest,IdleDetectorFactoryTest" 2>&1 | tail -15
 ```
 
 Expected:

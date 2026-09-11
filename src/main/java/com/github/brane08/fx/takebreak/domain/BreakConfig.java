@@ -59,10 +59,18 @@ public record BreakConfig(int smallBreak, int longBreak, int spacing,
             throw new RuntimeException("Failed to load config: " + CONFIG_FILE, e);
         }
         return new BreakConfig(
-                Integer.parseInt(props.getProperty("small",   String.valueOf(DEFAULT_SMALL))),
-                Integer.parseInt(props.getProperty("long",    String.valueOf(DEFAULT_LONG))),
-                Integer.parseInt(props.getProperty("spacing", String.valueOf(DEFAULT_SPACING))),
-                Integer.parseInt(props.getProperty("warning", String.valueOf(DEFAULT_WARNING))),
-                Integer.parseInt(props.getProperty("idle",    String.valueOf(DEFAULT_IDLE))));
+                parseIntOrDefault(props, "small",   DEFAULT_SMALL),
+                parseIntOrDefault(props, "long",    DEFAULT_LONG),
+                parseIntOrDefault(props, "spacing", DEFAULT_SPACING),
+                parseIntOrDefault(props, "warning", DEFAULT_WARNING),
+                parseIntOrDefault(props, "idle",    DEFAULT_IDLE));
+    }
+
+    private static int parseIntOrDefault(Properties props, String key, int defaultValue) {
+        try {
+            return Integer.parseInt(props.getProperty(key, String.valueOf(defaultValue)));
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 }

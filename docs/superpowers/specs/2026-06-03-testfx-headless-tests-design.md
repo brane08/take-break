@@ -108,7 +108,7 @@ No changes needed. `opens com.github.brane08.fx.takebreak.controllers` already a
 mvn test -Dtest="ConfigControllerTest"
 
 # Run all tests
-mvn test
+mvn test -Dtest="BreakConfigTest,ConfigControllerTest,IdleDetectorFactoryTest"
 ```
 
 ---

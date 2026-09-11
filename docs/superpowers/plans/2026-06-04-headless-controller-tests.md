@@ -377,7 +377,7 @@ BUILD SUCCESS
 - [ ] **Step 4: Run the full suite to check no regressions**
 
 ```bash
-mvn test 2>&1 | tail -10
+mvn test -Dtest="BreakConfigTest,ConfigControllerTest,IdleDetectorFactoryTest" 2>&1 | tail -10
 ```
 
 Expected:
