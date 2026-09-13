@@ -9,6 +9,7 @@ requires org.slf4j;
     requires com.sun.jna;
     requires com.sun.jna.platform;
     opens com.github.brane08.fx.takebreak.idle;
+    opens com.github.brane08.fx.takebreak.call;
 
     opens com.github.brane08.fx.takebreak;
 	exports com.github.brane08.fx.takebreak;

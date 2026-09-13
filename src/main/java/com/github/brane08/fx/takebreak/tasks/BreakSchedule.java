@@ -1,6 +1,7 @@
 package com.github.brane08.fx.takebreak.tasks;
 
 import com.github.brane08.fx.takebreak.Constants;
+import com.github.brane08.fx.takebreak.call.CallDetector;
 import com.github.brane08.fx.takebreak.domain.BreakConfig;
 import com.github.brane08.fx.takebreak.idle.IdleDetector;
 import com.github.brane08.fx.takebreak.inject.Injector;
@@ -26,17 +27,19 @@ public final class BreakSchedule implements Runnable {
     private final AtomicReference<MenuItem> skipItemRef;
     private final Function<Integer, Integer> startTimer;
     private final IdleDetector idleDetector;
+    private final CallDetector callDetector;
     private final AtomicLong currentEpoch;
     private final long myEpoch;
 
     public BreakSchedule(AtomicInteger counter, Stage currentStage, AtomicReference<MenuItem> skipItemRef,
-                         Function<Integer, Integer> startTimer, IdleDetector idleDetector,
+                         Function<Integer, Integer> startTimer, IdleDetector idleDetector, CallDetector callDetector,
                          AtomicLong currentEpoch, long myEpoch) {
         this.counter = counter;
         this.currentStage = currentStage;
         this.skipItemRef = skipItemRef;
         this.startTimer = startTimer;
         this.idleDetector = idleDetector;
+        this.callDetector = callDetector;
         this.currentEpoch = currentEpoch;
         this.myEpoch = myEpoch;
     }
@@ -49,6 +52,10 @@ public final class BreakSchedule implements Runnable {
             }
             LOG.info("{}", DateTimeFormatter.ISO_INSTANT.format(Instant.now()));
             BreakConfig breakConfig = Injector.resolveNamed(Constants.DI_BREAK_CONFIG);
+            if (callDetector.isCallActive()) {
+                LOG.info("Skipping break — call in progress");
+                return;
+            }
             long idleSecs = idleDetector.getIdleSeconds();
             if (idleSecs >= breakConfig.idleThreshold()) {
                 LOG.info("Skipping break — idle {}s >= threshold {}s",

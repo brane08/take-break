@@ -1,6 +1,8 @@
 package com.github.brane08.fx.takebreak;
 
 import com.dustinredmond.fxtrayicon.FXTrayIcon;
+import com.github.brane08.fx.takebreak.call.CallDetector;
+import com.github.brane08.fx.takebreak.call.CallDetectorFactory;
 import com.github.brane08.fx.takebreak.controllers.BreakController;
 import com.github.brane08.fx.takebreak.controllers.ConfigController;
 import com.github.brane08.fx.takebreak.controllers.WarningController;
@@ -56,6 +58,7 @@ public class BreakApplication extends Application {
     private final AtomicInteger counter = new AtomicInteger(0);
     private final AtomicLong epoch = new AtomicLong(0);
     private final IdleDetector idleDetector = IdleDetectorFactory.create();
+    private final CallDetector callDetector = CallDetectorFactory.create();
     private Stage defaultStage;
     private BreakController breakController;
     private volatile Future<?> schedulerFuture;
@@ -85,7 +88,7 @@ public class BreakApplication extends Application {
         final BreakConfig breakConfig = Injector.resolveNamed(Constants.DI_BREAK_CONFIG);
         LOG.info("Using configs: {}", breakConfig.toString());
         schedulerFuture = scheduler.scheduleAtFixedRate(
-                new BreakSchedule(counter, rootStage, skipItemRef, controller::startTimer, idleDetector, epoch, epoch.get()),
+                new BreakSchedule(counter, rootStage, skipItemRef, controller::startTimer, idleDetector, callDetector, epoch, epoch.get()),
                 breakConfig.spacing(), breakConfig.spacing(), TimeUnit.SECONDS);
         scheduleWarning(breakConfig);
         monitorPool.submit(() -> {
@@ -123,7 +126,7 @@ public class BreakApplication extends Application {
         warningFuture = null;
         long myEpoch = epoch.incrementAndGet();
         schedulerFuture = scheduler.scheduleAtFixedRate(
-                new BreakSchedule(counter, defaultStage, skipItemRef, breakController::startTimer, idleDetector, epoch, myEpoch),
+                new BreakSchedule(counter, defaultStage, skipItemRef, breakController::startTimer, idleDetector, callDetector, epoch, myEpoch),
                 config.spacing(), config.spacing(), TimeUnit.SECONDS);
         scheduleWarning(config);
         LOG.info("Rescheduled with spacing={}s warningTime={}s", config.spacing(), config.warningTime());
