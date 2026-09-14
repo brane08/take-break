@@ -7,8 +7,8 @@
 
 ## Potential improvements
 
-- `ApplicationLock` uses hardcoded port 14425 — make configurable or document.
-- Packaging: consider macOS code signing / notarization for Gatekeeper.
+- Packaging: consider macOS code signing / notarization for Gatekeeper (blocked — needs
+  a real Apple Developer ID certificate + notarization credentials, not available yet).
 - Packaging: consider Linux `.deb`/`.rpm` or Windows `.msi` for easier installation.
 - Tests: `BreakController` now has TestFX robot coverage (`BreakControllerUiTest`); could add
   more scenarios (e.g. skip mid-countdown, multiple starts).
