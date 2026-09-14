@@ -6,8 +6,8 @@
 - SLF4J 2.0.17 + Logback 1.5.32 (`src/main/resources/logback.xml`)
 - FXTrayIcon 4.2.3 — system tray via JavaFX (replaces AWT TrayIcon)
 - JNA 5.14.0 + jna-platform 5.14.0 — native idle detection (macOS/Windows/Linux)
-- JUnit Jupiter 5.11.4 + openjfx-monocle jdk-12.0.1+2 (test scope)
-- Jackson Databind 2.20.1 — registered in Injector as `DI_JSON_MAPPER`; **never resolved** (candidate for removal)
+- JUnit Jupiter 5.11.4 + openjfx-monocle 21.0.2 + testfx-core/testfx-junit5 4.0.18 (test scope) —
+  see `~/.claude/memory/libs/testfx-4.0.18-monocle.md` for the version/JPMS gotchas
 
 ## What it does
 System-tray desktop app that forces eye-break pauses.
@@ -193,7 +193,7 @@ macOS launcher PATH resolution order:
 | `IdleDetectorFactoryTest` | Factory non-null, correct subtype for current OS, Linux fallback returns ≥ 0 |
 | `FxHelper` | Test utility: `CountDownLatch READY` + `AtomicBoolean` to start Monocle Platform once per JVM |
 
-**Run tests (always use explicit -Dtest to avoid ApplicationTest hang):**
+**Run a fast subset:**
 ```bash
 mvn -q test -Dtest="BreakConfigTest,ConfigControllerTest,IdleDetectorFactoryTest"
 ```
@@ -205,7 +205,6 @@ mvn -q package
 
 ## Injector registration (initDefault)
 ```java
-registerNamed("jsonMapper", new ObjectMapper()); // registered but never resolved — candidate for removal
 registerNamed("breakConfig", BreakConfig.fromFile());
 ```
 
