@@ -12,4 +12,5 @@
 - Packaging: consider Linux `.deb`/`.rpm` or Windows `.msi` for easier installation.
 - Tests: `BreakController` now has TestFX robot coverage (`BreakControllerUiTest`); could add
   more scenarios (e.g. skip mid-countdown, multiple starts).
-- Tests: `WarningController` has no test coverage.
+- Tests: `WarningController` now has TestFX coverage (`WarningControllerUiTest`) — default
+  message label + auto-close-after-5s via `setStage()`.
