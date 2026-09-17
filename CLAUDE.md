@@ -62,7 +62,7 @@ Read the relevant files when deeper context is needed:
 
 ### Build & test commands
 ```
-# Fast headless test (always use this — ApplicationTest hangs)
+# Fast headless test (subset only)
 mvn -q test -Dtest="BreakConfigTest"
 
 # Compile check
@@ -82,11 +82,8 @@ bash scripts/run.sh
 | `controllers/ConfigController.java` | Settings dialog, FXML-bound sliders, reschedule callback |
 | `controllers/BreakController.java` | Countdown overlay, `AnimationTimer`, hide callback |
 | `domain/BreakConfig.java` | Immutable record; `fromFile()` / `save()` |
-| `inject/Injector.java` | Hand-rolled DI; `initDefault()` seeds `breakConfig` + `jsonMapper` |
+| `inject/Injector.java` | Hand-rolled DI; `initDefault()` seeds `breakConfig` |
 | `tasks/BreakSchedule.java` | Tick `Runnable`; re-resolves `breakConfig` from Injector each tick |
 
 ### Pitfalls
-- **Never run `mvn test` bare** — `ApplicationTest` calls `Application.launch()` and hangs.
-- `ApplicationTest.java` is a known broken test; skip or delete it before fixing.
-- `jackson-databind` is registered in `Injector` but never resolved — candidate for removal.
 - Spacing/break durations are all in **seconds** throughout the codebase.
