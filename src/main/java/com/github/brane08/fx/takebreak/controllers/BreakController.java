@@ -22,7 +22,7 @@ public class BreakController implements Initializable {
     private final int secondsPerMin = 60;
     private final SimpleStringProperty minuteProperty = new SimpleStringProperty("00");
     private final SimpleStringProperty secondProperty = new SimpleStringProperty("00");
-    private AnimationTimer currentTimer;
+    private CountdownTimer currentTimer;
     private Runnable hideCallback;
 
     @FXML
@@ -48,8 +48,11 @@ public class BreakController implements Initializable {
 
     public Integer startTimer(int timerFor) {
         LOG.info("Starting animation timer");
+        if (currentTimer != null) {
+            currentTimer.cancelSilently(); // replaced, not finished: keep the overlay up, no hide
+        }
         updateTiles(timerFor);
-        currentTimer = getAnimationTimer((double) timerFor);
+        currentTimer = new CountdownTimer(timerFor);
         currentTimer.start();
         LOG.info("Started animation timer");
         return 0;
@@ -63,34 +66,41 @@ public class BreakController implements Initializable {
         this.hideCallback = hideCallback;
     }
 
-    private AnimationTimer getAnimationTimer(double duration) {
-        return new AnimationTimer() {
+    private final class CountdownTimer extends AnimationTimer {
 
-            Duration timer = Duration.seconds(duration);
-            long lastTimerCall = System.nanoTime();
+        private Duration timer;
+        private long lastTimerCall = System.nanoTime();
 
-            @Override
-            public void handle(long now) {
-                if (now > lastTimerCall + 1000000000L) {
-                    timer = timer.subtract(Duration.seconds(1.0));
-                    int remainingSeconds = (int) timer.toSeconds();
-                    int m = remainingSeconds / secondsPerMin;
-                    int s = remainingSeconds % secondsPerMin;
-                    if (m == 0 && s == 0) {
-                        this.stop();
-                    }
-                    updateTiles(m, s);
-                    lastTimerCall = now;
+        CountdownTimer(double duration) {
+            this.timer = Duration.seconds(duration);
+        }
+
+        @Override
+        public void handle(long now) {
+            if (now > lastTimerCall + 1000000000L) {
+                timer = timer.subtract(Duration.seconds(1.0));
+                int remainingSeconds = (int) timer.toSeconds();
+                int m = remainingSeconds / secondsPerMin;
+                int s = remainingSeconds % secondsPerMin;
+                if (m == 0 && s == 0) {
+                    this.stop();
                 }
+                updateTiles(m, s);
+                lastTimerCall = now;
             }
+        }
 
-            @Override
-            public void stop() {
-                hideCallback.run();
-                LOG.info("stopped animation timer");
-                super.stop();
-            }
-        };
+        /** Finishes or skips the break: hides the overlay. */
+        @Override
+        public void stop() {
+            hideCallback.run();
+            LOG.info("stopped animation timer");
+            super.stop();
+        }
+
+        void cancelSilently() {
+            super.stop();
+        }
     }
 
     private void updateTiles(int seconds) {

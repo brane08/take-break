@@ -2,14 +2,10 @@
 
 ## Known issues
 
-- **`BreakController.startTimer()` doesn't stop a prior running timer**: calling
-  `startTimer()` again while a previous `AnimationTimer` is still active overwrites the
-  `currentTimer` field without stopping the old one — the orphaned timer keeps ticking in
-  the background and will eventually call `hideCallback` again on its own when it reaches
-  zero. In practice `BreakSchedule`'s epoch guard prevents overlapping calls, so this
-  hasn't caused an observed bug, but it's a latent double-hideCallback risk if that guard
-  is ever bypassed. Documented (not fixed) by
-  `BreakControllerUiTest.restartingTimerReplacesCurrentTimerReference`.
+None open. Resolved: `BreakController.startTimer()` now silently cancels a running timer
+(no hide callback), `BreakConfig.normalized()` keeps spacing above the longest break, and
+`BreakSchedule` drops a break while the overlay is still showing. The epoch guard only
+covers `reschedule()`, not overlapping ticks, so those three are what prevent overlap.
 
 ## Potential improvements
 

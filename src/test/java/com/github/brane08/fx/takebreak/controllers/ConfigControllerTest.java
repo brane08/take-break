@@ -67,4 +67,21 @@ class ConfigControllerTest {
         assertEquals(30,  saved.warningTime());
         assertEquals(240, saved.idleThreshold());
     }
+
+    @Test
+    void saveConfigRaisesSpacingAboveLongBreak() throws Exception {
+        ConfigController ctrl = loadController();
+        FxHelper.onFxThread(() -> {
+            ctrl.smallBreakSlider.setValue(60);
+            ctrl.longBreakSlider.setValue(300);
+            ctrl.spacingSlider.setValue(120);
+            ctrl.warningSlider.setValue(30);
+            ctrl.idleSlider.setValue(240);
+            ctrl.saveConfig();
+            return null;
+        });
+        BreakConfig saved = Injector.resolveNamed("breakConfig");
+        assertEquals(310, saved.spacing());
+        assertEquals(310, (int) ctrl.spacingSlider.getValue());
+    }
 }
