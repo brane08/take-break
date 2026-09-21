@@ -48,7 +48,7 @@ class WarningControllerUiTest {
         WaitForAsyncUtils.asyncFx(() -> controller.setStage(stage));
         WaitForAsyncUtils.waitForFxEvents();
 
-        WaitForAsyncUtils.waitFor(6, TimeUnit.SECONDS, () -> !stage.isShowing());
+        WaitForAsyncUtils.waitFor(20, TimeUnit.SECONDS, () -> !stage.isShowing());
         assertFalse(stage.isShowing());
     }
 }

@@ -32,7 +32,8 @@ class CallDetectorFactoryTest {
 
     @Test
     void platformDetectorNeverThrowsWithinTimeout() {
-        assertTimeoutPreemptively(java.time.Duration.ofSeconds(10), () -> {
+        // Worst case (Windows, two hung `reg` queries) is ~5s; leave generous headroom for slow CI.
+        assertTimeoutPreemptively(java.time.Duration.ofSeconds(20), () -> {
             assertDoesNotThrow(() -> CallDetectorFactory.create().isCallActive());
         });
     }

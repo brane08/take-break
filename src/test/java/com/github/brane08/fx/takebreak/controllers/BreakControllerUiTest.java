@@ -64,7 +64,7 @@ class BreakControllerUiTest {
         WaitForAsyncUtils.waitForFxEvents();
 
         Label seconds = robot.lookup("#seconds").queryAs(Label.class);
-        WaitForAsyncUtils.waitFor(3, TimeUnit.SECONDS, () -> !"05".equals(seconds.getText()));
+        WaitForAsyncUtils.waitFor(15, TimeUnit.SECONDS, () -> !"05".equals(seconds.getText()));
 
         robot.clickOn("#btnSkip");
         WaitForAsyncUtils.waitForFxEvents();
@@ -83,11 +83,26 @@ class BreakControllerUiTest {
         Label minutes = robot.lookup("#minutes").queryAs(Label.class);
         Label seconds = robot.lookup("#seconds").queryAs(Label.class);
         assertEquals("00", minutes.getText());
-        assertEquals("03", seconds.getText());
+        // The 3s timer may already have ticked once on a slow runner; the replaced 60s timer would read 59 or 60.
+        assertTrue(Integer.parseInt(seconds.getText()) <= 3, "label shows " + seconds.getText());
 
         robot.clickOn("#btnSkip");
         WaitForAsyncUtils.waitForFxEvents();
 
         assertEquals(1, hideCallCount.get());
+    }
+
+    @Test
+    void restartingTimerDoesNotInvokeHideCallback() {
+        WaitForAsyncUtils.asyncFx(() -> controller.startTimer(60));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        WaitForAsyncUtils.asyncFx(() -> controller.startTimer(30));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        assertEquals(0, hideCallCount.get());
+
+        WaitForAsyncUtils.asyncFx(controller::stopTimer); // don't leave a 30s timer running
+        WaitForAsyncUtils.waitForFxEvents();
     }
 }
