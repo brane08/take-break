@@ -67,7 +67,6 @@ public final class BreakSchedule implements Runnable {
             if (Thread.currentThread().isInterrupted() || currentEpoch.get() != myEpoch) {
                 return;
             }
-            int displayTime = breakConfig.getBreakTime(counter.addAndGet(1));
             Platform.runLater(() -> {
                 if (currentEpoch.get() != myEpoch) {
                     return; // superseded by a reschedule — drop this stale break
@@ -76,6 +75,9 @@ public final class BreakSchedule implements Runnable {
                     LOG.warn("Dropping break — previous break still showing");
                     return;
                 }
+                // Only advance the counter once we've committed to actually showing a break —
+                // a dropped tick above must not consume a slot in the short/long cadence.
+                int displayTime = breakConfig.getBreakTime(counter.addAndGet(1));
                 skipItemRef.get().setEnabled(true);
                 currentStage.show();
                 startTimer.apply(displayTime);
