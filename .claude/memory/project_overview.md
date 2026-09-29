@@ -54,7 +54,7 @@ public record BreakConfig(int smallBreak, int longBreak, int spacing,
 |---|---|---|---|
 | `smallBreak` | 60 | `small` | 10–120, step 10 |
 | `longBreak` | 300 | `long` | 60–600, step 60 |
-| `spacing` | 1200 | `spacing` | 60–3600, step 60 |
+| `spacing` | 1080 | `spacing` | 60–3600, step 60 |
 | `warningTime` | 30 | `warning` | 0–60, step 5 |
 | `idleThreshold` | 300 | `idle` | 60–600, step 60 |
 
