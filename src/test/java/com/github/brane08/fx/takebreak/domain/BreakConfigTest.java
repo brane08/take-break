@@ -10,7 +10,7 @@ class BreakConfigTest {
     void defaultConstantsAreDefined() {
         assertEquals(60,   BreakConfig.DEFAULT_SMALL);
         assertEquals(300,  BreakConfig.DEFAULT_LONG);
-        assertEquals(1200, BreakConfig.DEFAULT_SPACING);
+        assertEquals(1080, BreakConfig.DEFAULT_SPACING);
         assertEquals(30,   BreakConfig.DEFAULT_WARNING);
         assertEquals(300,  BreakConfig.DEFAULT_IDLE);
     }
@@ -64,5 +64,11 @@ class BreakConfigTest {
         assertEquals(original.spacing(),       loaded.spacing());
         assertEquals(original.warningTime(),   loaded.warningTime());
         assertEquals(original.idleThreshold(), loaded.idleThreshold());
+    }
+
+    @Test
+    void defaultOffsetsGive18_1_18_1_17_5Hour() {
+        var c = new BreakConfig(60, 300, 1080, 30, 300);
+        assertArrayEquals(new int[]{1080, 2220, 3300}, c.breakOffsets());
     }
 }

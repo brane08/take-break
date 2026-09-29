@@ -12,7 +12,7 @@ public record BreakConfig(int smallBreak, int longBreak, int spacing,
 
     public static final int DEFAULT_SMALL   = 60;
     public static final int DEFAULT_LONG    = 300;
-    public static final int DEFAULT_SPACING = 1200;
+    public static final int DEFAULT_SPACING = 1080;
     public static final int DEFAULT_WARNING = 30;
     public static final int DEFAULT_IDLE    = 300;
 
@@ -26,6 +26,15 @@ public record BreakConfig(int smallBreak, int longBreak, int spacing,
 
     /** Minimum gap (seconds) kept between a break's end and the next break / warning. */
     public static final int MIN_GAP = 10;
+    public static final int CYCLE = 3600;
+
+    /**
+     * Break start offsets (seconds) within one {@link #CYCLE}: two small breaks after {@code spacing}
+     * of work each, then the long break placed so it ends exactly at the cycle end.
+     */
+    public int[] breakOffsets() {
+        return new int[]{spacing, 2 * spacing + smallBreak, CYCLE - longBreak};
+    }
 
     public int getBreakTime(int instance) {
         return ((instance % 3) == 0) ? longBreak : smallBreak;
@@ -37,7 +46,8 @@ public record BreakConfig(int smallBreak, int longBreak, int spacing,
      */
     public BreakConfig normalized() {
         int minSpacing = Math.max(smallBreak, longBreak) + MIN_GAP;
-        int fixedSpacing = Math.max(spacing, minSpacing);
+        int maxSpacing = (CYCLE - longBreak - smallBreak - MIN_GAP) / 2;
+        int fixedSpacing = Math.min(Math.max(spacing, minSpacing), maxSpacing);
         int fixedWarning = warningTime >= fixedSpacing ? Math.max(0, fixedSpacing - MIN_GAP) : warningTime;
         if (fixedSpacing == spacing && fixedWarning == warningTime) {
             return this;

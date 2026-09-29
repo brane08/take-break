@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -61,8 +63,8 @@ public class BreakApplication extends Application {
     private final CallDetector callDetector = CallDetectorFactory.create();
     private Stage defaultStage;
     private BreakController breakController;
-    private volatile Future<?> schedulerFuture;
-    private volatile Future<?> warningFuture;
+    private volatile List<Future<?>> schedulerFutures = List.of();
+    private volatile List<Future<?>> warningFutures = List.of();
     private volatile Stage activeToast;
     private final Runnable cleanup = () -> {
         scheduler.shutdownNow();
@@ -89,11 +91,8 @@ public class BreakApplication extends Application {
         }
         final BreakConfig breakConfig = Injector.resolveNamed(Constants.DI_BREAK_CONFIG);
         LOG.info("Using configs: {}", breakConfig.toString());
-        schedulerFuture = scheduler.scheduleAtFixedRate(
-                new BreakSchedule(counter, rootStage, skipItemRef, controller::startTimer, idleDetector, callDetector, epoch, epoch.get()),
-                breakConfig.spacing(), breakConfig.spacing(), TimeUnit.SECONDS);
+        scheduleBreaks(breakConfig, rootStage, controller, epoch.get());
         scheduleWarning(breakConfig);
-        watch(schedulerFuture);
     }
 
     // A periodic task that throws is silently dropped by the executor; watching its future
@@ -129,26 +128,38 @@ public class BreakApplication extends Application {
         rootStage.setY(Y);
     }
 
+    private void scheduleBreaks(BreakConfig config, Stage stage, BreakController controller, long myEpoch) {
+        var futures = new ArrayList<Future<?>>();
+        for (int offset : config.breakOffsets()) {
+            var task = new BreakSchedule(counter, stage, skipItemRef, controller::startTimer, idleDetector, callDetector, epoch, myEpoch);
+            var future = scheduler.scheduleAtFixedRate(task, offset, BreakConfig.CYCLE, TimeUnit.SECONDS);
+            futures.add(future);
+            watch(future);
+        }
+        schedulerFutures = futures;
+    }
+
     private void reschedule(BreakConfig config) {
         // Bump the epoch before cancelling so a tick interrupted mid-detection already sees itself as stale.
         long myEpoch = epoch.incrementAndGet();
-        if (schedulerFuture != null) schedulerFuture.cancel(true);
-        if (warningFuture != null) warningFuture.cancel(true);
-        warningFuture = null;
-        schedulerFuture = scheduler.scheduleAtFixedRate(
-                new BreakSchedule(counter, defaultStage, skipItemRef, breakController::startTimer, idleDetector, callDetector, epoch, myEpoch),
-                config.spacing(), config.spacing(), TimeUnit.SECONDS);
+        schedulerFutures.forEach(f -> f.cancel(true));
+        warningFutures.forEach(f -> f.cancel(true));
+        warningFutures = List.of();
+        scheduleBreaks(config, defaultStage, breakController, myEpoch);
         scheduleWarning(config);
-        watch(schedulerFuture);
         LOG.info("Rescheduled with spacing={}s warningTime={}s", config.spacing(), config.warningTime());
     }
 
     private void scheduleWarning(BreakConfig config) {
         if (config.warningTime() <= 0) return;
-        long delay = Math.max(0, config.spacing() - config.warningTime());
-        warningFuture = scheduler.scheduleAtFixedRate(
-                new WarningSchedule(this::showWarningToast, callDetector::isCallActive),
-                delay, config.spacing(), TimeUnit.SECONDS);
+        var futures = new ArrayList<Future<?>>();
+        for (int offset : config.breakOffsets()) {
+            long delay = Math.max(0, offset - config.warningTime());
+            futures.add(scheduler.scheduleAtFixedRate(
+                    new WarningSchedule(this::showWarningToast, callDetector::isCallActive),
+                    delay, BreakConfig.CYCLE, TimeUnit.SECONDS));
+        }
+        warningFutures = futures;
     }
 
     private void showWarningToast() {
