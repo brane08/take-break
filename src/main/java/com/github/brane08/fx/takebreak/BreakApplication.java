@@ -190,6 +190,7 @@ public class BreakApplication extends Application {
 
     private void settingStage(Parent parent) {
         Stage settingsStage = new Stage();
+        settingsStage.setTitle("Take Break Settings");
         settingsStage.setScene(new Scene(parent));
         settingsStage.setResizable(false);
         settingsStage.setAlwaysOnTop(true);
@@ -207,7 +208,7 @@ public class BreakApplication extends Application {
             var image = new Image(getClass().getResourceAsStream("/coffee.png"));
             final var trayIcon = new FXTrayIcon.Builder(defaultStage, image)
                     .menuItem("Skip Break", e -> controller.stopTimer())
-                    .menuItem("Settings", e -> {
+                    .menuItem("Settings…", e -> {
                         final var loader = new FXMLLoader(getClass().getResource("/views/config.fxml"));
                         try {
                             final Parent parent = loader.load();
@@ -218,7 +219,7 @@ public class BreakApplication extends Application {
                             throw new RuntimeException(ex);
                         }
                     })
-                    .menuItem("Exit", e -> {
+                    .menuItem("Quit Take Break", e -> {
                         cleanup.run();
                         Platform.exit();
                         System.exit(0);
