@@ -12,7 +12,7 @@
 	<padding>
 		<Insets top="20" right="20" bottom="20" left="20"/>
 	</padding>
-	<Label alignment="CENTER" style="-fx-font-size: 2em; -fx-text-fill: azure;" text="Your break ends in!!!"
+	<Label alignment="CENTER" style="-fx-font-size: 2em; -fx-text-fill: azure;" text="Time for a Break"
 		   textAlignment="CENTER"/>
 	<HBox spacing="20.0" alignment="CENTER">
 		<padding>
@@ -20,12 +20,12 @@
 		</padding>
 		<VBox alignment="CENTER" prefHeight="200.0" prefWidth="200.0" spacing="8"
 			  style="-fx-background-color: #1a1a2a; -fx-background-radius: 8; -fx-padding: 15;">
-			<Label text="Minutes Remaining" style="-fx-text-fill: #8888aa; -fx-font-size: 0.85em;"/>
+			<Label text="Minutes" style="-fx-text-fill: #8888aa; -fx-font-size: 0.85em;"/>
 			<Label fx:id="minutes" text="00" style="-fx-text-fill: white; -fx-font-size: 6em; -fx-font-weight: bold;"/>
 		</VBox>
 		<VBox alignment="CENTER" prefHeight="200.0" prefWidth="200.0" spacing="8"
 			  style="-fx-background-color: #1a1a2a; -fx-background-radius: 8; -fx-padding: 15;">
-			<Label text="Seconds Remaining" style="-fx-text-fill: #8888aa; -fx-font-size: 0.85em;"/>
+			<Label text="Seconds" style="-fx-text-fill: #8888aa; -fx-font-size: 0.85em;"/>
 			<Label fx:id="seconds" text="00" style="-fx-text-fill: white; -fx-font-size: 6em; -fx-font-weight: bold;"/>
 		</VBox>
 	</HBox>
@@ -33,6 +33,6 @@
 		<padding>
 			<Insets top="20" right="20" bottom="20" left="20"/>
 		</padding>
-		<Button text="Skip Break!" fx:id="btnSkip" onAction="#stopTimer" style="-fx-font-size: 1.1em;"/>
+		<Button text="Skip Break" fx:id="btnSkip" onAction="#stopTimer" style="-fx-font-size: 1.1em;"/>
 	</HBox>
 </VBox>

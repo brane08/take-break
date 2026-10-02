@@ -38,7 +38,7 @@ class WarningControllerUiTest {
     @Test
     void displaysDefaultMessage(FxRobot robot) {
         Label label = robot.lookup("#message").query();
-        assertEquals("Break coming up", label.getText());
+        assertEquals("Your break starts soon", label.getText());
     }
 
     @Test

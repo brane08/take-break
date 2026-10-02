@@ -66,3 +66,7 @@ DONE: BreakApplicationTest — start() stage/scene wiring + stop() no-throw, via
 TestFX ApplicationExtension
 PENDING: Consider closing BreakApplication.activeToast Stage explicitly on app stop()
 (minor, low-value — JVM exit already closes it)
+
+## Review (2026-10-02, UI copy)
+
+DONE: Professional UI text — settings labels/buttons, break overlay, warning toast, tray menu, settings window title

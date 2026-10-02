@@ -14,23 +14,23 @@
 	<padding>
 		<Insets top="20" right="20" bottom="20" left="20"/>
 	</padding>
-	<Label text="Short Break (seconds):" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+	<Label text="Short Break Duration (seconds):" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
 	<Slider fx:id="smallBreakSlider" blockIncrement="10.0" majorTickUnit="20.0" max="120.0" min="10.0"
 			minorTickCount="1" showTickMarks="true" showTickLabels="true" snapToTicks="true"
 			GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-	<Label text="Long Break (seconds):" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+	<Label text="Long Break Duration (seconds):" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
 	<Slider fx:id="longBreakSlider" blockIncrement="60.0" majorTickUnit="60.0" max="600.0" min="60.0"
 			showTickMarks="true" showTickLabels="true" snapToTicks="true"
 			GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-	<Label text="Spacing (seconds):" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+	<Label text="Break Interval (seconds):" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
 	<Slider fx:id="spacingSlider" blockIncrement="60.0" majorTickUnit="600.0" max="3600.0" min="60.0"
 			minorTickCount="4" showTickMarks="true" showTickLabels="true" snapToTicks="true"
 			GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-	<Label text="Warning (seconds):" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+	<Label text="Advance Notice (seconds):" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
 	<Slider fx:id="warningSlider" blockIncrement="10.0" majorTickUnit="30.0" max="120.0" min="0.0"
 			showTickMarks="true" showTickLabels="true" snapToTicks="true"
 			GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-	<Label text="Idle Timeout (seconds):" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+	<Label text="Idle Threshold (seconds):" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
 	<Slider fx:id="idleSlider" blockIncrement="60" majorTickUnit="60" max="600" min="60"
 			showTickMarks="true" showTickLabels="true" snapToTicks="true"
 			GridPane.columnIndex="1" GridPane.rowIndex="4"/>
@@ -38,7 +38,7 @@
 		<padding>
 			<Insets top="10"/>
 		</padding>
-		<Button text="Reset" onAction="#resetDefaults"/>
+		<Button text="Restore Defaults" onAction="#resetDefaults"/>
 		<Button text="Save" onAction="#saveConfig"/>
 	</HBox>
 	<columnConstraints>
