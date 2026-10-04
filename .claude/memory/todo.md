@@ -70,3 +70,9 @@ PENDING: Consider closing BreakApplication.activeToast Stage explicitly on app s
 ## Review (2026-10-02, UI copy)
 
 DONE: Professional UI text — settings labels/buttons, break overlay, warning toast, tray menu, settings window title
+
+## Review (2026-10-04, VS Code port)
+
+DONE: Scaffold vscode-extension/ (config, break panel, scheduler, idle skip, status bar toggle)
+PENDING: Manually test in Extension Development Host (F5)
+PENDING: IntelliJ plugin port
