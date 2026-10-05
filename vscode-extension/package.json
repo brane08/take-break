@@ -1,0 +1,40 @@
+{
+  "name": "take-break",
+  "displayName": "Take Break",
+  "description": "Periodic break reminders with a countdown panel, advance notice and idle detection.",
+  "version": "0.1.0",
+  "publisher": "brane08",
+  "license": "MIT",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "takeBreak.skip", "title": "Take Break: Skip Break" },
+      { "command": "takeBreak.now", "title": "Take Break: Start Break Now" },
+      { "command": "takeBreak.toggle", "title": "Take Break: Pause / Resume Reminders" }
+    ],
+    "configuration": {
+      "title": "Take Break",
+      "properties": {
+        "takeBreak.shortBreakSeconds": { "type": "integer", "default": 60, "minimum": 10, "maximum": 120, "description": "Short break duration (seconds)." },
+        "takeBreak.longBreakSeconds": { "type": "integer", "default": 300, "minimum": 60, "maximum": 600, "description": "Long break duration (seconds). Every third break is a long break." },
+        "takeBreak.intervalSeconds": { "type": "integer", "default": 1080, "minimum": 60, "maximum": 3600, "description": "Time between breaks (seconds)." },
+        "takeBreak.noticeSeconds": { "type": "integer", "default": 30, "minimum": 0, "maximum": 120, "description": "Advance notice before a break (seconds). 0 disables." },
+        "takeBreak.idleThresholdSeconds": { "type": "integer", "default": 300, "minimum": 60, "maximum": 600, "description": "Skip a break if there has been no editor activity for this long (seconds)." }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.0.0",
+    "typescript": "^5.4.0"
+  }
+}
