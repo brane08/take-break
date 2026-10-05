@@ -1,0 +1,24 @@
+<idea-plugin>
+    <id>com.github.brane08.takebreak</id>
+    <name>Take Break</name>
+    <vendor>brane08</vendor>
+    <description>Periodic break reminders with a countdown dialog, advance notice and idle skip.</description>
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="com.github.brane08.takebreak.BreakSettings"/>
+        <applicationService serviceImplementation="com.github.brane08.takebreak.BreakService"/>
+        <applicationConfigurable parentId="tools" instance="com.github.brane08.takebreak.BreakConfigurable"
+                                 id="com.github.brane08.takebreak.settings" displayName="Take Break"/>
+        <notificationGroup id="Take Break" displayType="BALLOON"/>
+        <postStartupActivity implementation="com.github.brane08.takebreak.StartupActivity"/>
+    </extensions>
+
+    <actions>
+        <group id="TakeBreak.Group" text="Take Break" popup="true">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <action id="TakeBreak.Now" class="com.github.brane08.takebreak.StartBreakAction" text="Start Break Now"/>
+            <action id="TakeBreak.Toggle" class="com.github.brane08.takebreak.ToggleAction" text="Pause / Resume Reminders"/>
+        </group>
+    </actions>
+</idea-plugin>
