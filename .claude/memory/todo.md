@@ -77,3 +77,6 @@ DONE: Scaffold vscode-extension/ (config, break panel, scheduler, idle skip, sta
 PENDING: Manually test in Extension Development Host (F5)
 DONE: Scaffold intellij-plugin/ (Kotlin, settings, service, countdown dialog, notice, idle skip)
 PENDING: Build + run IntelliJ plugin (gradle runIde) — not verifiable in cloud sandbox
+
+DONE: Manual-only GitHub Actions workflow (.github/workflows/plugins.yml) for IntelliJ + VS Code builds
+PENDING: Run Plugins workflow (Actions tab) once; enable push/PR triggers when ready
