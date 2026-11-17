@@ -185,6 +185,7 @@
 						--add-opens=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED
 						--add-opens=javafx.base/com.sun.javafx.logging=ALL-UNNAMED
 						-Dtake-break.config.dir=${project.build.directory}/take-break-test
+						-Dtake-break.test=true
 					</argLine>
 				</configuration>
 			</plugin>

@@ -84,7 +84,9 @@ public class BreakApplication extends Application {
         this.breakController = controller;
         controller.setHideCallback(hideCallback);
         initStage(rootStage, parent);
-        systemTray(controller);
+        if (!Boolean.getBoolean("take-break.test")) {
+            systemTray(controller);
+        }
         final BreakConfig breakConfig = Injector.resolveNamed(Constants.DI_BREAK_CONFIG);
         LOG.info("Using configs: {}", breakConfig.toString());
         schedulerFuture = scheduler.scheduleAtFixedRate(

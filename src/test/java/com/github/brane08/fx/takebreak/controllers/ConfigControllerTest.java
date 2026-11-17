@@ -7,7 +7,10 @@ import javafx.fxml.FXMLLoader;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ConfigControllerTest {
 
@@ -83,5 +86,24 @@ class ConfigControllerTest {
         BreakConfig saved = Injector.resolveNamed("breakConfig");
         assertEquals(310, saved.spacing());
         assertEquals(310, (int) ctrl.spacingSlider.getValue());
+    }
+
+    @Test
+    void saveConfigInvokesRescheduleCallbackWithSavedConfig() throws Exception {
+        ConfigController ctrl = loadController();
+        AtomicReference<BreakConfig> received = new AtomicReference<>();
+        FxHelper.onFxThread(() -> {
+            ctrl.setRescheduleCallback(received::set);
+            ctrl.smallBreakSlider.setValue(15);
+            ctrl.longBreakSlider.setValue(90);
+            ctrl.spacingSlider.setValue(600);
+            ctrl.warningSlider.setValue(20);
+            ctrl.idleSlider.setValue(180);
+            ctrl.saveConfig();
+            return null;
+        });
+        assertNotNull(received.get());
+        assertEquals(15, received.get().smallBreak());
+        assertEquals(90, received.get().longBreak());
     }
 }
