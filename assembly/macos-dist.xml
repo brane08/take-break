@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.1.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.0 http://maven.apache.org/xsd/assembly-2.1.0.xsd">
+    <id>macos-dist</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <files>
+        <file>
+            <source>${project.build.directory}/${project.artifactId}-app.jar</source>
+            <outputDirectory>TakeBreak.app/Contents/Java</outputDirectory>
+            <destName>take-break-app.jar</destName>
+        </file>
+    </files>
+    <fileSets>
+        <!-- Info.plist and Resources/coffee.icns — standard permissions -->
+        <fileSet>
+            <directory>src/main/assembly/macos/Contents</directory>
+            <outputDirectory>TakeBreak.app/Contents</outputDirectory>
+            <excludes>
+                <exclude>MacOS/**</exclude>
+            </excludes>
+        </fileSet>
+        <!-- TakeBreak launcher — must be executable (0755) -->
+        <fileSet>
+            <directory>src/main/assembly/macos/Contents/MacOS</directory>
+            <outputDirectory>TakeBreak.app/Contents/MacOS</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+    </fileSets>
+</assembly>

@@ -1,6 +1,5 @@
 package com.github.brane08.fx.takebreak.inject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.brane08.fx.takebreak.Constants;
 import com.github.brane08.fx.takebreak.domain.BreakConfig;
 
@@ -42,7 +41,6 @@ public final class Injector {
     }
 
     public static void initDefault() {
-        registerNamed(Constants.DI_JSON_MAPPER, new ObjectMapper());
         registerNamed(Constants.DI_BREAK_CONFIG, BreakConfig.fromFile());
     }
 }

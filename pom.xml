@@ -14,11 +14,9 @@
 		<java.version>21</java.version>
 		<main.class>com.github.brane08.fx.takebreak.BreakApplication</main.class>
 		<javafx.version>21.0.9</javafx.version>
-		<tilesfx.version>21.0.9</tilesfx.version>
-		<slf4j.version>2.0.17</slf4j.version>
+<slf4j.version>2.0.17</slf4j.version>
 		<logback.version>1.5.32</logback.version>
-		<jackson.version>2.20.1</jackson.version>
-		<!-- Plugin versions -->
+<!-- Plugin versions -->
 		<compile.plugin.version>3.15.0</compile.plugin.version>
 		<dependency.plugin.version>3.10.0</dependency.plugin.version>
 		<versions.plugin.version>2.21.0</versions.plugin.version>
@@ -46,26 +44,32 @@
 			<artifactId>logback-classic</artifactId>
 			<version>${logback.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-		<dependency>
+<dependency>
 			<groupId>com.dustinredmond.fxtrayicon</groupId>
 			<artifactId>FXTrayIcon</artifactId>
 			<version>4.2.3</version>
 		</dependency>
-		<dependency>
-			<groupId>eu.hansolo</groupId>
-			<artifactId>tilesfx</artifactId>
-			<version>${tilesfx.version}</version>
-		</dependency>
-		<dependency>
+<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
 			<version>5.11.4</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testfx</groupId>
+			<artifactId>openjfx-monocle</artifactId>
+			<version>jdk-12.0.1+2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.java.dev.jna</groupId>
+			<artifactId>jna</artifactId>
+			<version>5.14.0</version>
+		</dependency>
+		<dependency>
+			<groupId>net.java.dev.jna</groupId>
+			<artifactId>jna-platform</artifactId>
+			<version>5.14.0</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -104,14 +108,38 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>dist</id>
+						<id>macos-dist</id>
 						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
+						<goals><goal>single</goal></goals>
 						<configuration>
+							<finalName>take-break-macos</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
 							<descriptors>
-								<descriptor>${project.basedir}/assembly/dist.xml</descriptor>
+								<descriptor>${project.basedir}/assembly/macos-dist.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+					<execution>
+						<id>linux-dist</id>
+						<phase>package</phase>
+						<goals><goal>single</goal></goals>
+						<configuration>
+							<finalName>take-break-linux</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+							<descriptors>
+								<descriptor>${project.basedir}/assembly/linux-dist.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+					<execution>
+						<id>windows-dist</id>
+						<phase>package</phase>
+						<goals><goal>single</goal></goals>
+						<configuration>
+							<finalName>take-break-windows</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+							<descriptors>
+								<descriptor>${project.basedir}/assembly/windows-dist.xml</descriptor>
 							</descriptors>
 						</configuration>
 					</execution>
@@ -121,6 +149,25 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<version>${dependency.plugin.version}</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.5.3</version>
+				<configuration>
+					<argLine>
+						-Djava.awt.headless=true
+						-Dglass.platform=Monocle
+						-Dprism.order=sw
+						-Dprism.text=t2k
+						--add-opens=javafx.graphics/com.sun.javafx.application=brane.fx.takebreak
+						--add-opens=javafx.graphics/com.sun.glass.ui=brane.fx.takebreak
+						--add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
+						--add-opens=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
+						--add-opens=javafx.graphics/com.sun.glass.ui.monocle=ALL-UNNAMED
+						-Dtake-break.config.dir=${project.build.directory}/take-break-test
+					</argLine>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>

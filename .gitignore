@@ -21,3 +21,6 @@ gradle-app.setting
 *.iml
 .DS_Store
 **/.DS_Store
+
+# Claude Code local-only settings (machine-specific overrides)
+.claude/settings.local.json

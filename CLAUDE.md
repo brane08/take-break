@@ -50,3 +50,43 @@ Read the relevant files when deeper context is needed:
 |---|---|
 | `.claude/memory/project_overview.md` | Architecture, modules, tech stack, file map, key design decisions |
 | `.claude/memory/pending_work.md` | Known issues and potential future improvements |
+| `.claude/memory/todo.md` | Active task tracking (PENDING/DOING/DONE/BLOCKED) |
+
+---
+
+## Project Context
+
+**Stack**: Java 21, JavaFX 21.0.9, JPMS, Maven → fat-jar `take-break-app.jar`
+**Module**: `brane.fx.takebreak`
+**Config file** (runtime): `~/.config/take-break/config.properties`
+
+### Build & test commands
+```
+# Fast headless test (always use this — ApplicationTest hangs)
+mvn -q test -Dtest="BreakConfigTest"
+
+# Compile check
+mvn -q compile
+
+# Full fat-jar build
+mvn -q package
+
+# Run (macOS — sets HiDPI flags)
+bash scripts/run.sh
+```
+
+### Key entry points
+| File | Purpose |
+|---|---|
+| `BreakApplication.java` | `main()`, `start()`, tray setup, `reschedule()` |
+| `controllers/ConfigController.java` | Settings dialog, FXML-bound sliders, reschedule callback |
+| `controllers/BreakController.java` | Countdown overlay, `AnimationTimer`, hide callback |
+| `domain/BreakConfig.java` | Immutable record; `fromFile()` / `save()` |
+| `inject/Injector.java` | Hand-rolled DI; `initDefault()` seeds `breakConfig` + `jsonMapper` |
+| `tasks/BreakSchedule.java` | Tick `Runnable`; re-resolves `breakConfig` from Injector each tick |
+
+### Pitfalls
+- **Never run `mvn test` bare** — `ApplicationTest` calls `Application.launch()` and hangs.
+- `ApplicationTest.java` is a known broken test; skip or delete it before fixing.
+- `jackson-databind` is registered in `Injector` but never resolved — candidate for removal.
+- Spacing/break durations are all in **seconds** throughout the codebase.

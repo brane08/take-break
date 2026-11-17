@@ -4,7 +4,6 @@ public final class Constants {
 
     public static final String LOGGER_NAME = "take-break";
 
-    public static final String DI_JSON_MAPPER = "jsonMapper";
     public static final String DI_BREAK_CONFIG = "breakConfig";
 
     private Constants() {

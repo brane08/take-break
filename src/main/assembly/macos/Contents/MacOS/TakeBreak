@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Resolve java: prefer JAVA_HOME, then macOS java_home utility, then PATH
+if [ -n "$JAVA_HOME" ] && [ -x "$JAVA_HOME/bin/java" ]; then
+    JAVA_CMD="$JAVA_HOME/bin/java"
+elif [ -x "/usr/libexec/java_home" ]; then
+    JAVA_HOME_RESOLVED=$(/usr/libexec/java_home -v 21+ 2>/dev/null)
+    if [ -n "$JAVA_HOME_RESOLVED" ] && [ -x "$JAVA_HOME_RESOLVED/bin/java" ]; then
+        JAVA_CMD="$JAVA_HOME_RESOLVED/bin/java"
+    fi
+fi
+if [ -z "$JAVA_CMD" ]; then
+    if command -v java &>/dev/null; then
+        JAVA_CMD="java"
+    else
+        osascript -e 'display alert "Take Break" message "Java not found. Install Java 21+ from adoptium.net"'
+        exit 1
+    fi
+fi
+
+# Check version
+VERSION=$("$JAVA_CMD" -version 2>&1 | awk -F'"' '/version/{print $2}' | cut -d. -f1)
+if [ -z "$VERSION" ]; then
+    VERSION=$("$JAVA_CMD" --version 2>/dev/null | awk '{print $2}' | cut -d. -f1)
+fi
+if [ -z "$VERSION" ] || [ "$VERSION" -lt 21 ] 2>/dev/null; then
+    osascript -e "display alert \"Take Break\" message \"Java 21+ required. Found: ${VERSION:-unknown}\""
+    exit 1
+fi
+
+DIR="$(cd "$(dirname "$0")" && pwd)"
+exec "$JAVA_CMD" -Dprism.allowhidpi=true -jar "$DIR/../Java/take-break-app.jar"
