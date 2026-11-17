@@ -41,7 +41,9 @@ public class BreakController implements Initializable {
     }
 
     public void stopTimer() {
-        currentTimer.stop();
+        if (currentTimer != null) {
+            currentTimer.stop();
+        }
     }
 
     public Integer startTimer(int timerFor) {

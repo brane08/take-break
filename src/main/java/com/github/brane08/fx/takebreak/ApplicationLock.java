@@ -24,6 +24,9 @@ public final class ApplicationLock {
     }
 
     public static void releaseLock() {
+        if (SOCKET == null) {
+            return;
+        }
         try {
             SOCKET.close();
         } catch (IOException e) {

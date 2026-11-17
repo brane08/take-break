@@ -1,5 +1,6 @@
 package com.github.brane08.fx.takebreak.controllers;
 
+import com.github.brane08.fx.takebreak.Constants;
 import com.github.brane08.fx.takebreak.domain.BreakConfig;
 import com.github.brane08.fx.takebreak.inject.Injector;
 import javafx.fxml.FXML;
@@ -26,7 +27,7 @@ public class ConfigController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        BreakConfig config = Injector.resolveNamed("breakConfig");
+        BreakConfig config = Injector.resolveNamed(Constants.DI_BREAK_CONFIG);
         smallBreakSlider.setValue(config.smallBreak());
         longBreakSlider.setValue(config.longBreak());
         spacingSlider.setValue(config.spacing());
@@ -56,7 +57,7 @@ public class ConfigController implements Initializable {
         }
         BreakConfig updated = new BreakConfig(small, large, spacing, warning, idle);
         updated.save();
-        Injector.registerNamed("breakConfig", updated);
+        Injector.registerNamed(Constants.DI_BREAK_CONFIG, updated);
         if (rescheduleCallback != null) {
             rescheduleCallback.accept(updated);
         }
