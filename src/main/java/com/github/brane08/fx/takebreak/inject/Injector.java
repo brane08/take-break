@@ -1,6 +1,7 @@
 package com.github.brane08.fx.takebreak.inject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.brane08.fx.takebreak.Constants;
 import com.github.brane08.fx.takebreak.domain.BreakConfig;
 
 import java.util.Map;
@@ -22,6 +23,7 @@ public final class Injector {
         INSTANCES.put(name, instance);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T resolve(Class<T> type) {
         T instance = (T) INSTANCES.get(type.getName());
         if (instance == null) {
@@ -30,6 +32,7 @@ public final class Injector {
         return instance;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T resolveNamed(String name) {
         T instance = (T) INSTANCES.get(name);
         if (instance == null) {
@@ -39,7 +42,7 @@ public final class Injector {
     }
 
     public static void initDefault() {
-        registerNamed("jsonMapper", new ObjectMapper());
-        registerNamed("breakConfig", BreakConfig.fromPrefs());
+        registerNamed(Constants.DI_JSON_MAPPER, new ObjectMapper());
+        registerNamed(Constants.DI_BREAK_CONFIG, BreakConfig.fromFile());
     }
 }

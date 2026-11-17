@@ -1,5 +1,7 @@
 package com.github.brane08.fx.takebreak;
 
+import com.dustinredmond.fxtrayicon.FXTrayIcon;
+import com.github.brane08.fx.takebreak.controllers.BreakController;
 import com.github.brane08.fx.takebreak.domain.BreakConfig;
 import com.github.brane08.fx.takebreak.inject.Injector;
 import com.github.brane08.fx.takebreak.tasks.BreakSchedule;
@@ -9,20 +11,16 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BreakApplication extends Application {
@@ -47,6 +45,8 @@ public class BreakApplication extends Application {
     private final MenuItem skipItem = new MenuItem("Skip Break");
     private final AtomicInteger counter = new AtomicInteger(0);
     private Stage defaultStage;
+    private BreakController breakController;
+    private volatile Future<?> schedulerFuture;
     private final Runnable cleanup = () -> {
         scheduler.shutdownNow();
         monitorPool.shutdownNow();
@@ -64,23 +64,22 @@ public class BreakApplication extends Application {
         final var loader = new FXMLLoader(getClass().getResource("/views/main.fxml"));
         final Parent parent = loader.load();
         final BreakController controller = loader.getController();
+        this.breakController = controller;
         controller.setHideCallback(hideCallback);
         initStage(rootStage, parent);
         systemTray(controller);
         final BreakConfig breakConfig = Injector.resolveNamed("breakConfig");
-        final Future<?> future = scheduler.schedule(
+        LOG.info("Using configs: {}", breakConfig.toString());
+        schedulerFuture = scheduler.scheduleAtFixedRate(
                 new BreakSchedule(counter, rootStage, skipItem, controller::startTimer),
-                breakConfig.spacing(), TimeUnit.MINUTES);
+                breakConfig.spacing(), breakConfig.spacing(), TimeUnit.SECONDS);
         monitorPool.submit(() -> {
             try {
-                while (true) {
-                    if (scheduler.isShutdown()) {
-                        break;
-                    }
-                    future.get();
-                }
+                schedulerFuture.get();
             } catch (InterruptedException e) {
                 LOG.info("Timer stopped");
+            } catch (CancellationException e) {
+                LOG.info("Scheduler cancelled");
             } catch (Exception e) {
                 LOG.error("", e);
             }
@@ -89,6 +88,7 @@ public class BreakApplication extends Application {
 
     @Override
     public void stop() throws Exception {
+        cleanup.run();
         super.stop();
     }
 
@@ -102,43 +102,55 @@ public class BreakApplication extends Application {
         rootStage.setY(Y);
     }
 
-    private void systemTray(BreakController controller) throws IOException {
-        if (SystemTray.isSupported()) {
-            var tray = SystemTray.getSystemTray();
-            var image = ImageIO.read(getClass().getResource("/coffee.png"));
-            var popup = new PopupMenu();
-            var trayIcon = new TrayIcon(image, "Take Break", popup);
-
-            skipItem.setEnabled(false);
-            skipItem.addActionListener((e) -> {
-                Platform.runLater(() -> {
-                    controller.stopTimer();
-                });
-            });
-            popup.add(skipItem);
-
-            var exitItem = new MenuItem("Exit");
-            exitItem.addActionListener((e) -> {
-                cleanup.run();
-                Platform.exit();
-                tray.remove(trayIcon);
-                System.exit(0);
-            });
-            popup.add(exitItem);
-
-            trayIcon.setImageAutoSize(true);
-            try {
-                tray.add(trayIcon);
-                Taskbar.getTaskbar().setIconImage(image);
-            } catch (AWTException e) {
-                LOG.error("Can't add to tray");
-            }
-        } else {
-            LOG.error("Tray unavailable");
+    private void reschedule(BreakConfig config) {
+        if (schedulerFuture != null) {
+            schedulerFuture.cancel(false);
         }
+        schedulerFuture = scheduler.scheduleAtFixedRate(
+                new BreakSchedule(counter, defaultStage, skipItem, breakController::startTimer),
+                config.spacing(), config.spacing(), TimeUnit.SECONDS);
+        LOG.info("Rescheduled with spacing={}s", config.spacing());
+    }
+
+    private void settingStage(Parent parent) {
+        Stage settingsStage = new Stage();
+        settingsStage.setScene(new Scene(parent));
+        settingsStage.setResizable(false);
+        settingsStage.setAlwaysOnTop(true);
+        settingsStage.setX(X);
+        settingsStage.setY(Y);
+        settingsStage.showAndWait();
+    }
+
+    private void systemTray(BreakController controller) throws IOException {
+        var image = new Image(getClass().getResourceAsStream("/coffee.png"));
+        final var trayIcon = new FXTrayIcon.Builder(defaultStage, image)
+                .menuItem("Skip Break", e -> controller.stopTimer())
+                .menuItem("Settings", e -> {
+                    final var loader = new FXMLLoader(getClass().getResource("/views/config.fxml"));
+                    try {
+                        final Parent parent = loader.load();
+                        ConfigController cc = loader.getController();
+                        cc.setRescheduleCallback(this::reschedule);
+                        settingStage(parent);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                })
+                .menuItem("Exit", e -> {
+                    cleanup.run();
+                    Platform.exit();
+                    System.exit(0);
+                })
+                .show()
+                .build();
     }
 
     public static void main(String[] args) {
+        // Allow auto-detection of HiDPI scale when not set explicitly via -Dglass.gtk.uiScale
+        if (System.getProperty("glass.gtk.uiScale") == null) {
+            System.setProperty("glass.gtk.uiScale", "auto");
+        }
         Runtime.getRuntime().addShutdownHook(new Thread(ApplicationLock::releaseLock));
         ApplicationLock.tryToGetLock();
         Injector.initDefault();

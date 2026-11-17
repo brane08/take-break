@@ -7,4 +7,7 @@ else
   JAVA_PATH=java
 fi
 
-$JAVA_PATH -jar take-break-app.jar
+$JAVA_PATH \
+  -Dglass.gtk.uiScale=auto \
+  -Dprism.allowhidpi=true \
+  -jar take-break-app.jar
