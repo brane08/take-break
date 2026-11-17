@@ -52,14 +52,19 @@ public final class BreakSchedule implements Runnable {
             }
             LOG.info("{}", DateTimeFormatter.ISO_INSTANT.format(Instant.now()));
             BreakConfig breakConfig = Injector.resolveNamed(Constants.DI_BREAK_CONFIG);
-            if (callDetector.isCallActive()) {
+            if (callActive()) {
                 LOG.info("Skipping break — call in progress");
                 return;
             }
-            long idleSecs = idleDetector.getIdleSeconds();
+            long idleSecs = idleSeconds();
             if (idleSecs >= breakConfig.idleThreshold()) {
                 LOG.info("Skipping break — idle {}s >= threshold {}s",
                         idleSecs, breakConfig.idleThreshold());
+                return;
+            }
+            // Detection can block for seconds; a reschedule during that window interrupts this
+            // thread and bumps the epoch. Re-check so a superseded tick never consumes a break slot.
+            if (Thread.currentThread().isInterrupted() || currentEpoch.get() != myEpoch) {
                 return;
             }
             int displayTime = breakConfig.getBreakTime(counter.addAndGet(1));
@@ -67,12 +72,39 @@ public final class BreakSchedule implements Runnable {
                 if (currentEpoch.get() != myEpoch) {
                     return; // superseded by a reschedule — drop this stale break
                 }
+                if (currentStage.isShowing()) {
+                    LOG.warn("Dropping break — previous break still showing");
+                    return;
+                }
                 skipItemRef.get().setEnabled(true);
                 currentStage.show();
                 startTimer.apply(displayTime);
             });
         } catch (Exception e) {
             LOG.error("Unhandled exception, check!!!", e);
+        } catch (Error e) {
+            LOG.error("Fatal error in break schedule", e);
+            throw e;
+        }
+    }
+
+    // Detectors are best-effort: a failure (including a missing native library) must never
+    // stop breaks from firing, so treat it as "no call" / "not idle".
+    private boolean callActive() {
+        try {
+            return callDetector.isCallActive();
+        } catch (Exception | LinkageError e) {
+            LOG.warn("Call detection failed, assuming no call", e);
+            return false;
+        }
+    }
+
+    private long idleSeconds() {
+        try {
+            return idleDetector.getIdleSeconds();
+        } catch (Exception | LinkageError e) {
+            LOG.warn("Idle detection failed, assuming user is active", e);
+            return 0;
         }
     }
 }

@@ -33,6 +33,26 @@ class BreakConfigTest {
     }
 
     @Test
+    void normalizedRaisesSpacingAboveLongestBreak() {
+        var fixed = new BreakConfig(60, 300, 120, 30, 300).normalized();
+        assertEquals(310, fixed.spacing());
+        assertEquals(30, fixed.warningTime());
+    }
+
+    @Test
+    void normalizedKeepsWarningBeforeBreak() {
+        var fixed = new BreakConfig(60, 300, 600, 900, 300).normalized();
+        assertEquals(600, fixed.spacing());
+        assertEquals(590, fixed.warningTime());
+    }
+
+    @Test
+    void normalizedReturnsSameInstanceWhenValid() {
+        var valid = new BreakConfig(60, 300, 1200, 30, 300);
+        assertSame(valid, valid.normalized());
+    }
+
+    @Test
     void saveAndLoadRoundTrip() {
         var original = new BreakConfig(15, 120, 300, 45, 240);
         original.save();

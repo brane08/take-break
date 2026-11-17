@@ -51,11 +51,9 @@ public class ConfigController implements Initializable {
         int spacing = (int) spacingSlider.getValue();
         int warning = (int) warningSlider.getValue();
         int idle = (int) idleSlider.getValue();
-        if (warning >= spacing) {
-            warning = Math.max(0, spacing - 10);
-            warningSlider.setValue(warning);
-        }
-        BreakConfig updated = new BreakConfig(small, large, spacing, warning, idle);
+        BreakConfig updated = new BreakConfig(small, large, spacing, warning, idle).normalized();
+        spacingSlider.setValue(updated.spacing());
+        warningSlider.setValue(updated.warningTime());
         updated.save();
         Injector.registerNamed(Constants.DI_BREAK_CONFIG, updated);
         if (rescheduleCallback != null) {

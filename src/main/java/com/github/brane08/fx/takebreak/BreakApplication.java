@@ -91,15 +91,22 @@ public class BreakApplication extends Application {
                 new BreakSchedule(counter, rootStage, skipItemRef, controller::startTimer, idleDetector, callDetector, epoch, epoch.get()),
                 breakConfig.spacing(), breakConfig.spacing(), TimeUnit.SECONDS);
         scheduleWarning(breakConfig);
+        watch(schedulerFuture);
+    }
+
+    // A periodic task that throws is silently dropped by the executor; watching its future
+    // is the only place that failure becomes visible. Must cover every (re)scheduled future.
+    private void watch(Future<?> future) {
         monitorPool.submit(() -> {
             try {
-                schedulerFuture.get();
+                future.get();
             } catch (InterruptedException e) {
                 LOG.info("Timer stopped");
+                Thread.currentThread().interrupt();
             } catch (CancellationException e) {
                 LOG.info("Scheduler cancelled");
             } catch (Exception e) {
-                LOG.error("", e);
+                LOG.error("Break scheduler died — breaks will no longer fire", e);
             }
         });
     }
@@ -121,14 +128,16 @@ public class BreakApplication extends Application {
     }
 
     private void reschedule(BreakConfig config) {
+        // Bump the epoch before cancelling so a tick interrupted mid-detection already sees itself as stale.
+        long myEpoch = epoch.incrementAndGet();
         if (schedulerFuture != null) schedulerFuture.cancel(true);
         if (warningFuture != null) warningFuture.cancel(true);
         warningFuture = null;
-        long myEpoch = epoch.incrementAndGet();
         schedulerFuture = scheduler.scheduleAtFixedRate(
                 new BreakSchedule(counter, defaultStage, skipItemRef, breakController::startTimer, idleDetector, callDetector, epoch, myEpoch),
                 config.spacing(), config.spacing(), TimeUnit.SECONDS);
         scheduleWarning(config);
+        watch(schedulerFuture);
         LOG.info("Rescheduled with spacing={}s warningTime={}s", config.spacing(), config.warningTime());
     }
 
@@ -136,7 +145,7 @@ public class BreakApplication extends Application {
         if (config.warningTime() <= 0) return;
         long delay = Math.max(0, config.spacing() - config.warningTime());
         warningFuture = scheduler.scheduleAtFixedRate(
-                new WarningSchedule(this::showWarningToast),
+                new WarningSchedule(this::showWarningToast, callDetector::isCallActive),
                 delay, config.spacing(), TimeUnit.SECONDS);
     }
 

@@ -24,8 +24,25 @@ public record BreakConfig(int smallBreak, int longBreak, int spacing,
                 : Path.of(System.getProperty("user.home"), ".config", "take-break", "config.properties");
     }
 
+    /** Minimum gap (seconds) kept between a break's end and the next break / warning. */
+    public static final int MIN_GAP = 10;
+
     public int getBreakTime(int instance) {
         return ((instance % 3) == 0) ? longBreak : smallBreak;
+    }
+
+    /**
+     * Returns a config where spacing outlasts the longest break (so a new break never starts
+     * while the previous overlay is still counting down) and the warning fires before the break.
+     */
+    public BreakConfig normalized() {
+        int minSpacing = Math.max(smallBreak, longBreak) + MIN_GAP;
+        int fixedSpacing = Math.max(spacing, minSpacing);
+        int fixedWarning = warningTime >= fixedSpacing ? Math.max(0, fixedSpacing - MIN_GAP) : warningTime;
+        if (fixedSpacing == spacing && fixedWarning == warningTime) {
+            return this;
+        }
+        return new BreakConfig(smallBreak, longBreak, fixedSpacing, fixedWarning, idleThreshold);
     }
 
     public void save() {
@@ -63,7 +80,7 @@ public record BreakConfig(int smallBreak, int longBreak, int spacing,
                 parseIntOrDefault(props, "long",    DEFAULT_LONG),
                 parseIntOrDefault(props, "spacing", DEFAULT_SPACING),
                 parseIntOrDefault(props, "warning", DEFAULT_WARNING),
-                parseIntOrDefault(props, "idle",    DEFAULT_IDLE));
+                parseIntOrDefault(props, "idle",    DEFAULT_IDLE)).normalized();
     }
 
     private static int parseIntOrDefault(Properties props, String key, int defaultValue) {
