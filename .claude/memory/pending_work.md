@@ -2,23 +2,21 @@
 
 ## Known issues
 
-- **`ApplicationTest.java` hangs**: calls `Application.launch()` inside a `@Test`; never exits.
-  Not a real test. Fix: delete it, or replace with a headless FXML-load assertion.
-
-- **Jackson registered but unused**: `Injector.initDefault()` registers `new ObjectMapper()` as
-  `"jsonMapper"` but nothing ever resolves it. The dep and registration can be removed.
-  Note: `com.fasterxml.jackson.databind` was already removed from module-info.java but the
-  Jackson dep may still be in pom.xml — verify before removing.
-
-- **TakeBreak.iconset/ temp dir**: `src/main/resources/TakeBreak.iconset/` left by icns generation,
-  untracked. Safe to `rm -rf src/main/resources/TakeBreak.iconset`.
+- **`BreakController.startTimer()` doesn't stop a prior running timer**: calling
+  `startTimer()` again while a previous `AnimationTimer` is still active overwrites the
+  `currentTimer` field without stopping the old one — the orphaned timer keeps ticking in
+  the background and will eventually call `hideCallback` again on its own when it reaches
+  zero. In practice `BreakSchedule`'s epoch guard prevents overlapping calls, so this
+  hasn't caused an observed bug, but it's a latent double-hideCallback risk if that guard
+  is ever bypassed. Documented (not fixed) by
+  `BreakControllerUiTest.restartingTimerReplacesCurrentTimerReference`.
 
 ## Potential improvements
 
-- Remove Jackson dep + `"jsonMapper"` registration in `Injector.initDefault()`.
-- Fix or delete `ApplicationTest.java`.
-- `ApplicationLock` uses hardcoded port 14425 — make configurable or document.
-- Packaging: consider macOS code signing / notarization for Gatekeeper.
+- Packaging: consider macOS code signing / notarization for Gatekeeper (blocked — needs
+  a real Apple Developer ID certificate + notarization credentials, not available yet).
 - Packaging: consider Linux `.deb`/`.rpm` or Windows `.msi` for easier installation.
-- Tests: `BreakController` has no headless test coverage yet.
-- Tests: `WarningController` has no test coverage.
+- Tests: `BreakController` now has 3 TestFX robot tests (`BreakControllerUiTest`) —
+  immediate skip, skip mid-countdown, and restart-overwrites-timer.
+- Tests: `WarningController` now has TestFX coverage (`WarningControllerUiTest`) — default
+  message label + auto-close-after-5s via `setStage()`.
